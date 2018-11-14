@@ -1,0 +1,9 @@
+# Directories
+/dist/
+
+# Files
+/TODO
+.DS_Store
+
+# Patterns
+.*.sw[op]
