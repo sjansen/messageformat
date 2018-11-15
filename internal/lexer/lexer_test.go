@@ -19,6 +19,10 @@ func TestLexer(t *testing.T) {
 			Type:  token.TEXT,
 			Value: "Spoon!",
 		}}},
+		{"Olá mundo!", []*token.Token{{
+			Type:  token.TEXT,
+			Value: "Olá mundo!",
+		}}},
 		{"Hello, {audience}!", []*token.Token{{
 			Type:  token.TEXT,
 			Value: "Hello, ",
@@ -49,6 +53,10 @@ func TestLexer(t *testing.T) {
 			Value: ", World!",
 		}}},
 		{"It's peanut butter jelly time!", []*token.Token{{
+			Type:  token.TEXT,
+			Value: "It's peanut butter jelly time!",
+		}}},
+		{"It''s peanut butter jelly time!", []*token.Token{{
 			Type:  token.TEXT,
 			Value: "It's peanut butter jelly time!",
 		}}},

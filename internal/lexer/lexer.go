@@ -138,6 +138,11 @@ func (l *Lexer) readMessageToken() (*token.Token, error) {
 			return t, nil
 		}
 		l.read()
+		if r == '\'' {
+			if r, err := l.peek(); err == nil && r == '\'' {
+				l.read()
+			}
+		}
 		b.WriteRune(r)
 	}
 }
