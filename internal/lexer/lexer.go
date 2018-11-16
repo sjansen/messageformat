@@ -8,13 +8,20 @@ import (
 	"github.com/sjansen/messageformat/ast/token"
 )
 
+var EOF = &token.Token{
+	Type:  token.EOF,
+	Value: "",
+}
+
 type Lexer struct {
 	buf        *bufio.Reader
 	line       int
 	byteOffset int
 	runeOffset int
+
 	inArgument bool
-	next       struct {
+
+	next struct {
 		r    rune
 		size int
 		err  error
@@ -28,71 +35,47 @@ func New(r io.Reader) *Lexer {
 	} else {
 		l.buf = bufio.NewReader(r)
 	}
+
+	c, size, err := l.buf.ReadRune()
+	l.next.r = c
+	l.next.size = size
+	l.next.err = err
 	return l
 }
 
 func (l *Lexer) Next() (*token.Token, error) {
-	r, err := l.peek()
-	if err != nil {
-		return nil, err
-	}
 	switch {
-	case !l.inArgument && r == '{':
-		l.inArgument = true
-		l.read()
-		t := &token.Token{
-			Type:  token.LBRACE,
-			Value: "{",
-		}
-		return t, nil
-	case l.inArgument && r == '}':
-		l.inArgument = false
-		l.read()
-		t := &token.Token{
-			Type:  token.RBRACE,
-			Value: "}",
-		}
-		return t, nil
+	case l.next.err == io.EOF:
+		return EOF, nil
+	case l.next.err != nil:
+		return nil, l.next.err
 	case l.inArgument:
 		return l.readArgToken()
 	default:
-		return l.readMessageToken()
+		return l.readNextToken()
 	}
 }
 
 func (l *Lexer) peek() (rune, error) {
-	if l.next.err == nil && l.next.size == 0 {
-		r, size, err := l.buf.ReadRune()
-		l.next.r = r
-		l.next.size = size
-		l.next.err = err
-	}
 	return l.next.r, l.next.err
 }
 
 func (l *Lexer) read() (rune, error) {
-	err := l.next.err
-	if err != nil {
-		return 0, err
+	if l.next.err != nil {
+		return 0, l.next.err
 	}
 
-	r := l.next.r
-	size := l.next.size
-	if size != 0 {
-		l.next.r = 0
-		l.next.size = 0
-	} else {
-		r, size, err = l.buf.ReadRune()
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	l.byteOffset += size
+	l.byteOffset += l.next.size
 	l.runeOffset++
-	if r == '\n' {
+	if l.next.r == '\n' {
 		l.line++
 	}
+
+	r, size, err := l.buf.ReadRune()
+	r, l.next.r = l.next.r, r
+	l.next.size = size
+	l.next.err = err
+
 	return r, nil
 }
 
@@ -100,60 +83,129 @@ func (l *Lexer) read() (rune, error) {
 // argName = [^[[:Pattern_Syntax:][:Pattern_White_Space:]]]+
 // argNumber = '0' | ('1'..'9' ('0'..'9')*)
 func (l *Lexer) readArgNameOrNumber() (*token.Token, error) {
-	var b strings.Builder
-	for {
-		r, err := l.peek()
-		if err != nil && err != io.EOF {
-			return nil, err
-		} else if err == io.EOF || isPatternWhiteSpace(r) || isPatternSyntax(r) {
-			t := &token.Token{
-				Type:  token.TEXT,
-				Value: b.String(),
-			}
-			return t, nil
-		}
-		l.read()
-		b.WriteRune(r)
+	s, err := l.readWhile(func(r rune) bool {
+		return !isPatternWhiteSpace(r) && !isPatternSyntax(r)
+	})
+	if err != nil {
+		return nil, err
 	}
+
+	t := &token.Token{
+		Type:  token.TEXT,
+		Value: s,
+	}
+	return t, nil
 }
 
 func (l *Lexer) readArgToken() (*token.Token, error) {
 	l.skipWhiteSpace()
-	t, err := l.readArgNameOrNumber()
-	l.skipWhiteSpace()
-	return t, err
-}
 
-func (l *Lexer) readMessageToken() (*token.Token, error) {
-	var b strings.Builder
-	for {
-		r, err := l.peek()
-		if err != nil && err != io.EOF {
-			return nil, err
-		} else if err == io.EOF || r == '{' {
+	r, err := l.peek()
+	if err == nil {
+		if r == ',' {
+			_, _ = l.read()
 			t := &token.Token{
-				Type:  token.TEXT,
-				Value: b.String(),
+				Type:  token.COMMA,
+				Value: ",",
+			}
+			return t, nil
+		} else if r == '}' {
+			_, _ = l.read()
+			l.inArgument = false
+			t := &token.Token{
+				Type:  token.RBRACE,
+				Value: "}",
 			}
 			return t, nil
 		}
-		l.read()
-		if r == '\'' {
-			if r, err := l.peek(); err == nil && r == '\'' {
-				l.read()
-			}
-		}
-		b.WriteRune(r)
 	}
+
+	return l.readArgNameOrNumber()
+}
+
+/*
+messageText can contain quoted literal strings including syntax characters.
+A quoted literal string begins with an ASCII apostrophe and a syntax
+character (usually a {curly brace}) and continues until the next single
+apostrophe. A double ASCII apostrohpe inside or outside of a quoted string
+represents one literal apostrophe.
+
+Quotable syntax characters are the {curly braces} in all messageText parts,
+plus the '#' sign in a messageText immediately inside a pluralStyle,
+and the '|' symbol in a messageText immediately inside a choiceStyle.
+*/
+func (l *Lexer) readMessageToken() (*token.Token, error) {
+	var b strings.Builder
+	for l.next.err == nil {
+		if l.next.r == '{' {
+			break
+		} else if l.next.r == '\'' {
+			_, _ = l.read()
+			if l.next.r == '\'' {
+				b.WriteRune('\'')
+				_, _ = l.read()
+				continue
+			} else if l.next.r != '{' && l.next.r != '}' {
+				b.WriteRune('\'')
+				b.WriteRune(l.next.r)
+				_, _ = l.read()
+				continue
+			}
+			for l.next.err == nil {
+				b.WriteRune(l.next.r)
+				_, _ = l.read()
+				if l.next.r == '\'' {
+					_, _ = l.read()
+					break
+				}
+			}
+		} else {
+			b.WriteRune(l.next.r)
+			_, _ = l.read()
+		}
+	}
+
+	t := &token.Token{
+		Type:  token.TEXT,
+		Value: b.String(),
+	}
+	return t, nil
+}
+
+func (l *Lexer) readNextToken() (*token.Token, error) {
+	r, err := l.peek()
+	if err == nil && r == '{' {
+		_, _ = l.read()
+		l.inArgument = true
+		t := &token.Token{
+			Type:  token.LBRACE,
+			Value: "{",
+		}
+		return t, nil
+	}
+
+	return l.readMessageToken()
+}
+
+func (l *Lexer) readWhile(f func(r rune) bool) (string, error) {
+	var b strings.Builder
+	for l.next.err == nil {
+		if f(l.next.r) {
+			b.WriteRune(l.next.r)
+			_, _ = l.read()
+		} else {
+			break
+		}
+	}
+	return b.String(), nil
 }
 
 func (l *Lexer) skipWhiteSpace() {
-	for {
-		if r, err := l.peek(); err != nil {
-			return
-		} else if !isPatternWhiteSpace(r) {
-			return
+	for l.next.err == nil {
+		if isPatternWhiteSpace(l.next.r) {
+			_, _ = l.read()
+		} else {
+			break
 		}
-		l.read()
 	}
 }

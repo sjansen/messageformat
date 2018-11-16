@@ -5,6 +5,7 @@ const (
 	COMMA  TokenType = ","
 	LBRACE TokenType = "{"
 	RBRACE TokenType = "}"
+	EOF    TokenType = "eof"
 )
 
 type TokenType string

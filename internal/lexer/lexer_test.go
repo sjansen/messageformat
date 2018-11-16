@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"io"
 	"strconv"
 	"strings"
 	"testing"
@@ -73,8 +72,10 @@ func TestLexer(t *testing.T) {
 				require.NoError(err)
 				require.Equal(expected, actual)
 			}
-			_, err := l.Next()
-			require.Equal(io.EOF, err)
+			tkn, err := l.Next()
+			require.NoError(err)
+			require.NotNil(tkn)
+			require.Equal(token.EOF, tkn.Type)
 		})
 	}
 }
