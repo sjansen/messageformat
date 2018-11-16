@@ -147,16 +147,24 @@ func (l *Lexer) readMessageToken() (*token.Token, error) {
 				continue
 			} else if l.next.r != '{' && l.next.r != '}' {
 				b.WriteRune('\'')
-				b.WriteRune(l.next.r)
-				_, _ = l.read()
+				if l.next.err == nil {
+					b.WriteRune(l.next.r)
+					_, _ = l.read()
+				}
 				continue
 			}
 			for l.next.err == nil {
-				b.WriteRune(l.next.r)
-				_, _ = l.read()
 				if l.next.r == '\'' {
 					_, _ = l.read()
-					break
+					if l.next.r == '\'' {
+						b.WriteRune('\'')
+						_, _ = l.read()
+					} else {
+						break
+					}
+				} else {
+					b.WriteRune(l.next.r)
+					_, _ = l.read()
 				}
 			}
 		} else {

@@ -59,6 +59,10 @@ func TestLexer(t *testing.T) {
 			Type:  token.TEXT,
 			Value: "It's peanut butter jelly time!",
 		}}},
+		{"'-'''{-''-}'''-'", []*token.Token{{
+			Type:  token.TEXT,
+			Value: "'-'{-'-}'-'",
+		}}},
 	} {
 		tc := tc
 		name := strconv.Itoa(idx)
