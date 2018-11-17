@@ -63,6 +63,49 @@ func TestLexer(t *testing.T) {
 			Type:  token.TEXT,
 			Value: "'-'{-'-}'-'",
 		}}},
+		{"From: {begin,date}\nUntil: {end,date,short}", []*token.Token{{
+			Type:  token.TEXT,
+			Value: "From: ",
+		}, {
+			Type:  token.LBRACE,
+			Value: "{",
+		}, {
+			Type:  token.TEXT,
+			Value: "begin",
+		}, {
+			Type:  token.COMMA,
+			Value: ",",
+		}, {
+			Type:  token.TEXT,
+			Value: "date",
+		}, {
+			Type:  token.RBRACE,
+			Value: "}",
+		}, {
+			Type:  token.TEXT,
+			Value: "\nUntil: ",
+		}, {
+			Type:  token.LBRACE,
+			Value: "{",
+		}, {
+			Type:  token.TEXT,
+			Value: "end",
+		}, {
+			Type:  token.COMMA,
+			Value: ",",
+		}, {
+			Type:  token.TEXT,
+			Value: "date",
+		}, {
+			Type:  token.COMMA,
+			Value: ",",
+		}, {
+			Type:  token.TEXT,
+			Value: "short",
+		}, {
+			Type:  token.RBRACE,
+			Value: "}",
+		}}},
 	} {
 		tc := tc
 		name := strconv.Itoa(idx)
