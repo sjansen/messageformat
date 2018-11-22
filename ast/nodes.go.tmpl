@@ -1,0 +1,29 @@
+package ast
+
+/*
+type Node struct {
+	Positions *Positions
+}
+*/
+
+{{ range $type := split "Text,PlainArg,PluralArg,SelectArg,SimpleArg" }}
+var _ Node = &{{ $type }}{}
+
+func (x *{{ $type }}) HasPositions() bool {
+	return x.Positions != nil
+}
+
+func (x *{{ $type }}) Begin() Position {
+	if x.Positions != nil {
+		return x.Positions.Begin
+	}
+	return Position{}
+}
+
+func (x *{{ $type }}) End() Position {
+	if x.Positions != nil {
+		return x.Positions.End
+	}
+	return Position{}
+}
+{{ end }}
