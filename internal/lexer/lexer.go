@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/sjansen/messageformat/ast/token"
+	"github.com/sjansen/messageformat/internal/lexer/token"
 )
 
 var EOF = &token.Token{

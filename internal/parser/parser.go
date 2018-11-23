@@ -5,8 +5,8 @@ import (
 	"io"
 
 	"github.com/sjansen/messageformat/ast"
-	"github.com/sjansen/messageformat/ast/token"
 	"github.com/sjansen/messageformat/internal/lexer"
+	"github.com/sjansen/messageformat/internal/lexer/token"
 )
 
 func Parse(r io.Reader) (*ast.Message, error) {

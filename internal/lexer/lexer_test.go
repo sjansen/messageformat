@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sjansen/messageformat/ast/token"
+	"github.com/sjansen/messageformat/internal/lexer/token"
 	"github.com/stretchr/testify/require"
 )
 
