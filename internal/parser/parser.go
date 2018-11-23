@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/sjansen/messageformat/ast"
+	"github.com/sjansen/messageformat/errors"
 	"github.com/sjansen/messageformat/internal/lexer"
 	"github.com/sjansen/messageformat/internal/lexer/token"
 )
@@ -32,7 +32,7 @@ func Parse(r io.Reader) (*ast.Message, error) {
 		case token.TEXT:
 			nodes = append(nodes, &ast.Text{Value: tkn.Value})
 		default:
-			err = fmt.Errorf("Unexpected token: %q", tkn.Value)
+			err = &errors.UnexpectedToken{Token: tkn.Value}
 			return nil, err
 		}
 	}
@@ -43,7 +43,7 @@ func parseArgument(l *lexer.Lexer) (ast.Node, error) {
 	if err != nil {
 		return nil, err
 	} else if tkn.Type != token.TEXT {
-		err = fmt.Errorf("Unexpected token: %q", tkn.Value)
+		err = &errors.UnexpectedToken{Token: tkn.Value}
 		return nil, err
 	}
 	argNameOrNumber := tkn.Value
@@ -52,7 +52,7 @@ func parseArgument(l *lexer.Lexer) (ast.Node, error) {
 	if err != nil {
 		return nil, err
 	} else if tkn.Type != token.RBRACE {
-		err = fmt.Errorf("Unexpected token: %q", tkn.Value)
+		err = &errors.UnexpectedToken{Token: tkn.Value}
 		return nil, err
 	}
 
