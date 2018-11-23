@@ -6,9 +6,9 @@ type ArgStyle int
 
 type SimpleArg struct {
 	Positions *Positions
-	ArgID      string
-	ArgType    ArgType
-	ArgStyle   ArgStyle
+	ArgID     string
+	ArgType   ArgType
+	ArgStyle  ArgStyle
 }
 
 const (
