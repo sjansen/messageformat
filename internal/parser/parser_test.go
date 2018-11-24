@@ -87,6 +87,12 @@ func TestParseMessage(t *testing.T) {
 			&ast.Text{Value: "\nUntil: "},
 			&ast.PlainArg{ArgID: "end"},
 		}},
+		{"From: {begin,date}\nUntil: {end,date,short}", []ast.Node{
+			&ast.Text{Value: "From: "},
+			&ast.SimpleArg{ArgID: "begin", ArgType: ast.DateType},
+			&ast.Text{Value: "\nUntil: "},
+			&ast.SimpleArg{ArgID: "end", ArgType: ast.DateType, ArgStyle: ast.ShortStyle},
+		}},
 	} {
 		tc := tc
 		name := strconv.Itoa(idx)

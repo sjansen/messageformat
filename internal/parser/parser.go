@@ -67,23 +67,47 @@ type parser struct {
 }
 
 func (p *parser) parseArgument() (ast.Node, error) {
+	if err := p.requireRune('{'); err != nil {
+		return nil, err
+	}
+
+	p.skipWhiteSpace()
+	argNameOrNumber := p.parseID()
+	p.skipWhiteSpace()
+
 	p.dec.Decode()
 	ch := p.dec.Decoded()
-	if ch != '{' {
+	if ch == '}' {
+		arg := &ast.PlainArg{ArgID: argNameOrNumber}
+		return arg, nil
+	} else if ch != ',' {
 		return nil, &errors.UnexpectedToken{Token: string(ch)}
 	}
 
 	p.skipWhiteSpace()
-
-	arg := &ast.PlainArg{ArgID: p.parseID()}
-
+	keyword := p.parseID()
+	argType := ast.ArgTypeFromKeyword(keyword)
 	p.skipWhiteSpace()
 
 	p.dec.Decode()
 	ch = p.dec.Decoded()
-	if ch != '}' {
+	if ch == '}' {
+		arg := &ast.SimpleArg{ArgID: argNameOrNumber, ArgType: argType}
+		return arg, nil
+	} else if ch != ',' {
 		return nil, &errors.UnexpectedToken{Token: string(ch)}
 	}
+
+	p.skipWhiteSpace()
+	keyword = p.parseID()
+	argStyle := ast.ArgStyleFromKeyword(keyword)
+	p.skipWhiteSpace()
+
+	if err := p.requireRune('}'); err != nil {
+		return nil, err
+	}
+
+	arg := &ast.SimpleArg{ArgID: argNameOrNumber, ArgType: argType, ArgStyle: argStyle}
 	return arg, nil
 }
 
@@ -159,6 +183,15 @@ func (p *parser) parseMessageText() (*ast.Text, error) {
 	}
 	t := &ast.Text{Value: b.String()}
 	return t, nil
+}
+
+func (p *parser) requireRune(token rune) error {
+	p.dec.Decode()
+	ch := p.dec.Decoded()
+	if ch == token {
+		return nil
+	}
+	return &errors.UnexpectedToken{Token: string(ch)}
 }
 
 func (p *parser) skipWhiteSpace() {
