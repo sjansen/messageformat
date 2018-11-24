@@ -66,9 +66,6 @@ const (
 	MediumStyle
 	PercentStyle
 	ShortStyle
-	// non-keyword
-	TextStyle
-	SkeletonStyle
 	InvalidStyle
 )
 

@@ -61,6 +61,7 @@ func (p *parser) parseArgument(depth int) (ast.Node, error) {
 			Messages: messages,
 		}
 	} else if argType := ast.ArgTypeFromKeyword(keyword); argType != ast.InvalidType {
+		// TODO argStyleText and argSkeletonText
 		argStyle, err := p.parseSimpleStyle(depth)
 		if err != nil {
 			return nil, err
