@@ -2,14 +2,13 @@ package parser
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/sjansen/messageformat/ast"
 	"github.com/stretchr/testify/require"
 )
 
-func TestParser(t *testing.T) {
+func TestParse(t *testing.T) {
 	for idx, tc := range []struct {
 		input    string
 		expected *ast.Message
@@ -38,70 +37,25 @@ func TestParser(t *testing.T) {
 		{"'-'''{-''-}'''-'", &ast.Message{Nodes: []ast.Node{
 			&ast.Text{Value: "'-'{-'-}'-'"},
 		}}},
-	} {
-		tc := tc
-		name := strconv.Itoa(idx)
-		t.Run(name, func(t *testing.T) {
-			require := require.New(t)
-
-			r := strings.NewReader(tc.input)
-			msg, err := Parse(r)
-			require.NoError(err)
-			require.Equal(tc.expected, msg)
-		})
-	}
-}
-
-func TestParseMessage(t *testing.T) {
-	for idx, tc := range []struct {
-		input    string
-		expected []ast.Node
-	}{
-		{"Spoon!", []ast.Node{
-			&ast.Text{Value: "Spoon!"},
-		}},
-		{"Olá mundo!", []ast.Node{
-			&ast.Text{Value: "Olá mundo!"},
-		}},
-		{"Hello, {audience}!", []ast.Node{
-			&ast.Text{Value: "Hello, "},
-			&ast.PlainArg{ArgID: "audience"},
-			&ast.Text{Value: "!"},
-		}},
-		{"{ greeting }, World!", []ast.Node{
-			&ast.PlainArg{ArgID: "greeting"},
-			&ast.Text{Value: ", World!"},
-		}},
-		{"It's peanut butter jelly time!", []ast.Node{
-			&ast.Text{Value: "It's peanut butter jelly time!"},
-		}},
-		{"It''s peanut butter jelly time!", []ast.Node{
-			&ast.Text{Value: "It's peanut butter jelly time!"},
-		}},
-		{"'-'''{-''-}'''-'", []ast.Node{
-			&ast.Text{Value: "'-'{-'-}'-'"},
-		}},
-		{"From: {begin}\nUntil: {end}", []ast.Node{
+		{"From: {begin}\nUntil: {end}", &ast.Message{Nodes: []ast.Node{
 			&ast.Text{Value: "From: "},
 			&ast.PlainArg{ArgID: "begin"},
 			&ast.Text{Value: "\nUntil: "},
 			&ast.PlainArg{ArgID: "end"},
-		}},
-		{"From: {begin,date}\nUntil: {end,date,short}", []ast.Node{
+		}}},
+		{"From: {begin,date}\nUntil: {end,date,short}", &ast.Message{Nodes: []ast.Node{
 			&ast.Text{Value: "From: "},
 			&ast.SimpleArg{ArgID: "begin", ArgType: ast.DateType},
 			&ast.Text{Value: "\nUntil: "},
 			&ast.SimpleArg{ArgID: "end", ArgType: ast.DateType, ArgStyle: ast.ShortStyle},
-		}},
+		}}},
 	} {
 		tc := tc
 		name := strconv.Itoa(idx)
 		t.Run(name, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.input)}
-
-			msg, err := p.parseMessage()
+			msg, err := Parse(tc.input)
 			require.NoError(err)
 			require.Equal(tc.expected, msg)
 		})
