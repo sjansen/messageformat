@@ -127,6 +127,26 @@ func TestParseArgument(t *testing.T) {
 				"evening":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Boa noite!"}}},
 				"other":     &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Bom dia!"}}},
 			}}},
+		{"{7,plural,=0{no elves}one{one elf}other{multiple elves}}", &ast.PluralArg{
+			ArgID: "7",
+			Messages: map[string]*ast.Message{
+				"=0":    &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "no elves"}}},
+				"one":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "one elf"}}},
+				"other": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "multiple elves"}}},
+			}}},
+		{`{ count, selectordinal,
+		    one {#st item}
+		    two {#nd item}
+		    few {#rd item}
+		    other {#th item} }`, &ast.PluralArg{
+			ArgID:   "count",
+			Ordinal: true,
+			Messages: map[string]*ast.Message{
+				"one":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#st item"}}},
+				"two":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#nd item"}}},
+				"few":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#rd item"}}},
+				"other": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#th item"}}},
+			}}},
 	} {
 		tc := tc
 		label := strconv.Itoa(idx)

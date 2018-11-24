@@ -1,5 +1,9 @@
 package parser
 
+func isDigit(r rune) bool {
+	return r >= '0' && r <= '9'
+}
+
 func isPatternSyntax(r rune) bool {
 	switch {
 	case r >= '\u0021' && r <= '\u002F':
