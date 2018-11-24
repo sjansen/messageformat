@@ -10,7 +10,7 @@ import (
 
 func Parse(s string) (*ast.Message, error) {
 	p := &parser{dec: NewDecoder(s)}
-	if nodes, err := p.parseMessage(); err != nil {
+	if nodes, err := p.parseMessage(0); err != nil {
 		return nil, err
 	} else {
 		msg := &ast.Message{Nodes: nodes}
@@ -22,7 +22,7 @@ type parser struct {
 	dec *Decoder
 }
 
-func (p *parser) parseArgument() (ast.Node, error) {
+func (p *parser) parseArgument(depth int) (ast.Node, error) {
 	if err := p.requireRune('{'); err != nil {
 		return nil, err
 	}
@@ -80,30 +80,42 @@ func (p *parser) parseID() string {
 	return b.String()
 }
 
-func (p *parser) parseMessage() ([]ast.Node, error) {
+func (p *parser) parseMessage(depth int) ([]ast.Node, error) {
 	nodes := []ast.Node{}
+	if depth > 0 {
+		if err := p.requireRune('{'); err != nil {
+			return nil, err
+		}
+	}
 	for {
 		next := p.dec.Peek()
 		if next == utf8.RuneError {
 			break // TODO
+		} else if depth > 0 && next == '}' {
+			break
 		} else if next == '{' {
-			node, err := p.parseArgument()
+			node, err := p.parseArgument(depth)
 			if err != nil {
 				return nil, err
 			}
 			nodes = append(nodes, node)
 		} else {
-			node, err := p.parseMessageText()
+			node, err := p.parseMessageText(depth)
 			if err != nil {
 				return nil, err
 			}
 			nodes = append(nodes, node)
 		}
 	}
+	if depth > 0 {
+		if err := p.requireRune('}'); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
-func (p *parser) parseMessageText() (*ast.Text, error) {
+func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
 	inQuote := false
 	var b strings.Builder
 	for p.dec.Decode() {
@@ -119,7 +131,7 @@ func (p *parser) parseMessageText() (*ast.Text, error) {
 				b.WriteRune('\'')
 				p.dec.Decode()
 				next := p.dec.Peek()
-				if !inQuote && next == '{' {
+				if !inQuote && (next == '{' || (depth > 0 && next == '}')) {
 					break
 				}
 			} else if inQuote {
@@ -132,7 +144,7 @@ func (p *parser) parseMessageText() (*ast.Text, error) {
 		} else {
 			b.WriteRune(ch)
 			next := p.dec.Peek()
-			if next == '{' {
+			if next == '{' || (depth > 0 && next == '}') {
 				break
 			}
 		}

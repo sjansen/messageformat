@@ -89,12 +89,58 @@ func TestParseArgument(t *testing.T) {
 
 			p := &parser{dec: NewDecoder(tc.input)}
 
-			actual, err := p.parseArgument()
+			actual, err := p.parseArgument(0)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
 	}
 }
+
+func TestParseMessage(t *testing.T) {
+	for idx, tc := range []struct {
+		depth    int
+		pattern  string
+		expected []ast.Node
+	}{
+		{0, "Spoon!", []ast.Node{
+			&ast.Text{Value: "Spoon!"},
+		}},
+		{1, "{Spoon!}", []ast.Node{
+			&ast.Text{Value: "Spoon!"},
+		}},
+		{0, "Hello, {audience}!", []ast.Node{
+			&ast.Text{Value: "Hello, "},
+			&ast.PlainArg{ArgID: "audience"},
+			&ast.Text{Value: "!"},
+		}},
+		{0, "{ greeting }, World!", []ast.Node{
+			&ast.PlainArg{ArgID: "greeting"},
+			&ast.Text{Value: ", World!"},
+		}},
+		{1, "{Hello, {audience}!}", []ast.Node{
+			&ast.Text{Value: "Hello, "},
+			&ast.PlainArg{ArgID: "audience"},
+			&ast.Text{Value: "!"},
+		}},
+		{1, "{{ greeting }, World!}", []ast.Node{
+			&ast.PlainArg{ArgID: "greeting"},
+			&ast.Text{Value: ", World!"},
+		}},
+	} {
+		tc := tc
+		label := strconv.Itoa(idx)
+		t.Run(label, func(t *testing.T) {
+			require := require.New(t)
+
+			p := &parser{dec: NewDecoder(tc.pattern)}
+
+			actual, err := p.parseMessage(tc.depth)
+			require.NoError(err)
+			require.Equal(tc.expected, actual)
+		})
+	}
+}
+
 func TestParseMessageText(t *testing.T) {
 	for idx, tc := range []struct {
 		input    string
@@ -138,7 +184,7 @@ func TestParseMessageText(t *testing.T) {
 
 			p := &parser{dec: NewDecoder(tc.input)}
 
-			actual, err := p.parseMessageText()
+			actual, err := p.parseMessageText(0)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
