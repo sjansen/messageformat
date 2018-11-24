@@ -130,9 +130,11 @@ func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
 			} else if next == '\'' {
 				b.WriteRune('\'')
 				p.dec.Decode()
-				next := p.dec.Peek()
-				if !inQuote && (next == '{' || (depth > 0 && next == '}')) {
-					break
+				if !inQuote {
+					next := p.dec.Peek()
+					if next == '{' || (depth > 0 && next == '}') {
+						break
+					}
 				}
 			} else if inQuote {
 				inQuote = false
