@@ -106,32 +106,26 @@ func TestParseArgument(t *testing.T) {
 		pattern  string
 		expected ast.Node
 	}{
+		{"{0}",
+			&ast.PlainArg{ArgID: "0"}},
 		{"{foo}",
 			&ast.PlainArg{ArgID: "foo"}},
 		{"{ bar }",
 			&ast.PlainArg{ArgID: "bar"}},
 		{"{ baz } qux",
 			&ast.PlainArg{ArgID: "baz"}},
-		{"{0}",
-			&ast.PlainArg{ArgID: "0"}},
-		{"{1,duration}",
-			&ast.SimpleArg{ArgID: "1", ArgType: ast.DurationType}},
-		{"{ 2, number, percent }", &ast.SimpleArg{
-			ArgID:    "2",
+		{"{4,duration}",
+			&ast.SimpleArg{ArgID: "4", ArgType: ast.DurationType}},
+		{"{ 5, number, percent }", &ast.SimpleArg{
+			ArgID:    "5",
 			ArgType:  ast.NumberType,
 			ArgStyle: ast.PercentStyle}},
-		{"{3,select,afternoon{Boa tarde!}evening{Boa noite!}other{Bom dia!}}", &ast.SelectArg{
-			ArgID: "3",
+		{"{6,select,afternoon{Boa tarde!}evening{Boa noite!}other{Bom dia!}}", &ast.SelectArg{
+			ArgID: "6",
 			Messages: map[string]*ast.Message{
-				"afternoon": &ast.Message{Nodes: []ast.Node{
-					&ast.Text{Value: "Boa tarde!"},
-				}},
-				"evening": &ast.Message{Nodes: []ast.Node{
-					&ast.Text{Value: "Boa noite!"},
-				}},
-				"other": &ast.Message{Nodes: []ast.Node{
-					&ast.Text{Value: "Bom dia!"},
-				}},
+				"afternoon": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Boa tarde!"}}},
+				"evening":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Boa noite!"}}},
+				"other":     &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Bom dia!"}}},
 			}}},
 	} {
 		tc := tc
