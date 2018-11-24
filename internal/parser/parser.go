@@ -36,34 +36,28 @@ func (p *parser) parseArgument(depth int) (ast.Node, error) {
 	if ch == '}' {
 		arg := &ast.PlainArg{ArgID: argNameOrNumber}
 		return arg, nil
-	} else if ch != ',' {
+	} else if ch == ',' {
+		p.skipWhiteSpace()
+	} else {
 		return nil, &errors.UnexpectedToken{Token: string(ch)}
 	}
 
-	p.skipWhiteSpace()
+	var arg ast.Node
 	keyword := p.parseID()
-	argType := ast.ArgTypeFromKeyword(keyword)
-	p.skipWhiteSpace()
-
-	p.dec.Decode()
-	ch = p.dec.Decoded()
-	if ch == '}' {
-		arg := &ast.SimpleArg{ArgID: argNameOrNumber, ArgType: argType}
-		return arg, nil
-	} else if ch != ',' {
-		return nil, &errors.UnexpectedToken{Token: string(ch)}
+	if argType := ast.ArgTypeFromKeyword(keyword); argType != ast.InvalidType {
+		argStyle, err := p.parseSimpleStyle(depth)
+		if err != nil {
+			return nil, err
+		}
+		arg = &ast.SimpleArg{ArgID: argNameOrNumber, ArgType: argType, ArgStyle: argStyle}
+	} else {
+		return nil, &errors.UnexpectedToken{Token: keyword}
 	}
-
-	p.skipWhiteSpace()
-	keyword = p.parseID()
-	argStyle := ast.ArgStyleFromKeyword(keyword)
-	p.skipWhiteSpace()
 
 	if err := p.requireRune('}'); err != nil {
 		return nil, err
 	}
 
-	arg := &ast.SimpleArg{ArgID: argNameOrNumber, ArgType: argType, ArgStyle: argStyle}
 	return arg, nil
 }
 
@@ -153,6 +147,28 @@ func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
 	}
 	t := &ast.Text{Value: b.String()}
 	return t, nil
+}
+
+func (p *parser) parseSimpleStyle(depth int) (ast.ArgStyle, error) {
+	p.skipWhiteSpace()
+	next := p.dec.Peek()
+	if next == '}' {
+		return ast.DefaultStyle, nil
+	} else if next == ',' {
+		p.dec.Decode()
+	} else {
+		return ast.DefaultStyle, &errors.UnexpectedToken{Token: string(next)}
+	}
+
+	p.skipWhiteSpace()
+	keyword := p.parseID()
+	argStyle := ast.ArgStyleFromKeyword(keyword)
+	if argStyle == ast.InvalidStyle {
+		return 0, &errors.UnexpectedToken{Token: keyword}
+	}
+
+	p.skipWhiteSpace()
+	return argStyle, nil
 }
 
 func (p *parser) requireRune(token rune) error {

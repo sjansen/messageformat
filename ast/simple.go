@@ -12,13 +12,14 @@ type SimpleArg struct {
 }
 
 const (
-	InvalidType ArgType = iota
+	DefaultType ArgType = iota
 	DateType
 	DurationType
 	NumberType
 	OrdinalType
 	SpelloutType
 	TimeType
+	InvalidType
 )
 
 var argTypeFromKeyword = map[string]ArgType{
@@ -57,7 +58,7 @@ func (x ArgType) ToKeyword() string {
 }
 
 const (
-	InvalidStyle = iota
+	DefaultStyle = iota
 	CurrencyStyle
 	FullStyle
 	IntegerStyle
@@ -68,6 +69,7 @@ const (
 	// non-keyword
 	TextStyle
 	SkeletonStyle
+	InvalidStyle
 )
 
 var argStyleFromKeyword = map[string]ArgStyle{
