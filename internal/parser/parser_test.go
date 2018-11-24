@@ -73,6 +73,14 @@ func TestParseArgument(t *testing.T) {
 			&ast.PlainArg{ArgID: "bar"}},
 		{"{ baz } qux",
 			&ast.PlainArg{ArgID: "baz"}},
+		{"{0}",
+			&ast.PlainArg{ArgID: "0"}},
+		{"{1,duration}",
+			&ast.SimpleArg{ArgID: "1", ArgType: ast.DurationType}},
+		{"{ 2, number, percent }", &ast.SimpleArg{
+			ArgID:    "2",
+			ArgType:  ast.NumberType,
+			ArgStyle: ast.PercentStyle}},
 	} {
 		tc := tc
 		label := strconv.Itoa(idx)
