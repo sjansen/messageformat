@@ -49,6 +49,45 @@ func TestParse(t *testing.T) {
 			&ast.Text{Value: "\nUntil: "},
 			&ast.SimpleArg{ArgID: "end", ArgType: ast.DateType, ArgStyle: ast.ShortStyle},
 		}}},
+		{"{timespan, select, afternoon{Boa tarde, {name}.} evening{Boa noite, {name}.} other{Bom dia, {name}.}}",
+			&ast.Message{Nodes: []ast.Node{
+				&ast.SelectArg{ArgID: "timespan",
+					Messages: map[string]*ast.Message{
+						"afternoon": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Boa tarde, "},
+							&ast.PlainArg{ArgID: "name"},
+							&ast.Text{Value: "."},
+						}},
+						"evening": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Boa noite, "},
+							&ast.PlainArg{ArgID: "name"},
+							&ast.Text{Value: "."},
+						}},
+						"other": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Bom dia, "},
+							&ast.PlainArg{ArgID: "name"},
+							&ast.Text{Value: "."},
+						}},
+					}},
+			}}},
+		{"{ timespan,select, afternoon{Boa tarde} evening{Boa noite} other{Bom dia} }, {name}.",
+			&ast.Message{Nodes: []ast.Node{
+				&ast.SelectArg{ArgID: "timespan",
+					Messages: map[string]*ast.Message{
+						"afternoon": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Boa tarde"},
+						}},
+						"evening": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Boa noite"},
+						}},
+						"other": &ast.Message{Nodes: []ast.Node{
+							&ast.Text{Value: "Bom dia"},
+						}},
+					}},
+				&ast.Text{Value: ", "},
+				&ast.PlainArg{ArgID: "name"},
+				&ast.Text{Value: "."},
+			}}},
 	} {
 		tc := tc
 		name := strconv.Itoa(idx)
@@ -81,6 +120,19 @@ func TestParseArgument(t *testing.T) {
 			ArgID:    "2",
 			ArgType:  ast.NumberType,
 			ArgStyle: ast.PercentStyle}},
+		{"{3,select,afternoon{Boa tarde!}evening{Boa noite!}other{Bom dia!}}", &ast.SelectArg{
+			ArgID: "3",
+			Messages: map[string]*ast.Message{
+				"afternoon": &ast.Message{Nodes: []ast.Node{
+					&ast.Text{Value: "Boa tarde!"},
+				}},
+				"evening": &ast.Message{Nodes: []ast.Node{
+					&ast.Text{Value: "Boa noite!"},
+				}},
+				"other": &ast.Message{Nodes: []ast.Node{
+					&ast.Text{Value: "Bom dia!"},
+				}},
+			}}},
 	} {
 		tc := tc
 		label := strconv.Itoa(idx)

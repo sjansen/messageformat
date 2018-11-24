@@ -43,8 +43,13 @@ func (p *parser) parseArgument(depth int) (ast.Node, error) {
 	}
 
 	var arg ast.Node
-	keyword := p.parseID()
-	if argType := ast.ArgTypeFromKeyword(keyword); argType != ast.InvalidType {
+	if keyword := p.parseID(); keyword == "select" {
+		messages, err := p.parseSelectStyle(depth)
+		if err != nil {
+			return nil, err
+		}
+		arg = &ast.SelectArg{ArgID: argNameOrNumber, Messages: messages}
+	} else if argType := ast.ArgTypeFromKeyword(keyword); argType != ast.InvalidType {
 		argStyle, err := p.parseSimpleStyle(depth)
 		if err != nil {
 			return nil, err
@@ -147,6 +152,31 @@ func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
 	}
 	t := &ast.Text{Value: b.String()}
 	return t, nil
+}
+
+func (p *parser) parseSelectStyle(depth int) (map[string]*ast.Message, error) {
+	p.skipWhiteSpace()
+	if err := p.requireRune(','); err != nil {
+		return nil, err
+	}
+
+	messages := map[string]*ast.Message{}
+	for {
+		p.skipWhiteSpace()
+		next := p.dec.Peek()
+		if next == '}' {
+			return messages, nil
+		}
+		id := p.parseID()
+		p.skipWhiteSpace()
+
+		if nodes, err := p.parseMessage(depth + 1); err != nil {
+			return nil, err
+		} else {
+			msg := &ast.Message{Nodes: nodes}
+			messages[id] = msg
+		}
+	}
 }
 
 func (p *parser) parseSimpleStyle(depth int) (ast.ArgStyle, error) {
