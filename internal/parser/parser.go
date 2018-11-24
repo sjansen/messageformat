@@ -91,12 +91,36 @@ func (p *parser) parseID() string {
 	var b strings.Builder
 	for p.dec.Decode() {
 		ch := p.dec.Decoded()
-		if isPatternWhiteSpace(ch) || isPatternSyntax(ch) {
+		b.WriteRune(ch)
+		next := p.dec.Peek()
+		if isPatternWhiteSpace(next) || isPatternSyntax(next) {
 			break
 		}
-		b.WriteRune(ch)
 	}
 	return b.String()
+}
+
+func (p *parser) parseMessage() ([]ast.Node, error) {
+	nodes := []ast.Node{}
+	for {
+		next := p.dec.Peek()
+		if next == utf8.RuneError {
+			break // TODO
+		} else if next == '{' {
+			node, err := p.parseArgument()
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+		} else {
+			node, err := p.parseMessageText()
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+		}
+	}
+	return nodes, nil
 }
 
 func (p *parser) parseMessageText() (*ast.Text, error) {
