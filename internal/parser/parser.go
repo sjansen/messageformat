@@ -66,6 +66,39 @@ type parser struct {
 	dec *Decoder
 }
 
+func (p *parser) parseArgument() (ast.Node, error) {
+	p.dec.Decode()
+	ch := p.dec.Decoded()
+	if ch != '{' {
+		return nil, &errors.UnexpectedToken{Token: string(ch)}
+	}
+
+	p.skipWhiteSpace()
+
+	arg := &ast.PlainArg{ArgID: p.parseID()}
+
+	p.skipWhiteSpace()
+
+	p.dec.Decode()
+	ch = p.dec.Decoded()
+	if ch != '}' {
+		return nil, &errors.UnexpectedToken{Token: string(ch)}
+	}
+	return arg, nil
+}
+
+func (p *parser) parseID() string {
+	var b strings.Builder
+	for p.dec.Decode() {
+		ch := p.dec.Decoded()
+		if isPatternWhiteSpace(ch) || isPatternSyntax(ch) {
+			break
+		}
+		b.WriteRune(ch)
+	}
+	return b.String()
+}
+
 func (p *parser) parseMessageText() (*ast.Text, error) {
 	inQuote := false
 	var b strings.Builder
@@ -102,4 +135,12 @@ func (p *parser) parseMessageText() (*ast.Text, error) {
 	}
 	t := &ast.Text{Value: b.String()}
 	return t, nil
+}
+
+func (p *parser) skipWhiteSpace() {
+	for next := p.dec.Peek(); isPatternWhiteSpace(next); next = p.dec.Peek() {
+		if !p.dec.Decode() {
+			break
+		}
+	}
 }

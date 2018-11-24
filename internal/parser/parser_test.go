@@ -52,6 +52,31 @@ func TestParser(t *testing.T) {
 	}
 }
 
+func TestParseArgument(t *testing.T) {
+	for idx, tc := range []struct {
+		input    string
+		expected ast.Node
+	}{
+		{"{foo}",
+			&ast.PlainArg{ArgID: "foo"}},
+		{"{ bar }",
+			&ast.PlainArg{ArgID: "bar"}},
+		{"{ baz } qux",
+			&ast.PlainArg{ArgID: "baz"}},
+	} {
+		tc := tc
+		label := strconv.Itoa(idx)
+		t.Run(label, func(t *testing.T) {
+			require := require.New(t)
+
+			p := &parser{dec: NewDecoder(tc.input)}
+
+			actual, err := p.parseArgument()
+			require.NoError(err)
+			require.Equal(tc.expected, actual)
+		})
+	}
+}
 func TestParseMessageText(t *testing.T) {
 	for idx, tc := range []struct {
 		input    string
