@@ -57,8 +57,36 @@ func TestParseMessageText(t *testing.T) {
 		input    string
 		expected *ast.Text
 	}{
-		{"Spoon!", &ast.Text{Value: "Spoon!"}},
-		{"Hello, {audience}!", &ast.Text{Value: "Hello, "}},
+		{"Spoon!",
+			&ast.Text{Value: "Spoon!"}},
+		{"Hello, {audience}!",
+			&ast.Text{Value: "Hello, "}},
+		{"It's peanut butter jelly time!",
+			&ast.Text{Value: "It's peanut butter jelly time!"}},
+		{"It''s peanut butter jelly time!",
+			&ast.Text{Value: "It's peanut butter jelly time!"}},
+		{"trailing quote'",
+			&ast.Text{Value: "trailing quote'"}},
+		{"-'{foo}-",
+			&ast.Text{Value: "-{foo}-"}},
+		{"-'{foo}'-",
+			&ast.Text{Value: "-{foo}-"}},
+		{"-'{foo}''-",
+			&ast.Text{Value: "-{foo}'-"}},
+		{"-'{foo}''-'",
+			&ast.Text{Value: "-{foo}'-"}},
+		{"-''{foo}''-",
+			&ast.Text{Value: "-'"}},
+		{"-'''{foo}'''-",
+			&ast.Text{Value: "-'{foo}'-"}},
+		{"'-{foo}-'",
+			&ast.Text{Value: "'-"}},
+		{"'-'{foo}'-'",
+			&ast.Text{Value: "'-{foo}-'"}},
+		{"'-''{foo}''-'",
+			&ast.Text{Value: "'-'"}},
+		{"'-'''{foo}'''-'",
+			&ast.Text{Value: "'-'{foo}'-'"}},
 	} {
 		tc := tc
 		label := strconv.Itoa(idx)
@@ -66,6 +94,7 @@ func TestParseMessageText(t *testing.T) {
 			require := require.New(t)
 
 			p := &parser{dec: NewDecoder(tc.input)}
+
 			actual, err := p.parseMessageText()
 			require.NoError(err)
 			require.Equal(tc.expected, actual)

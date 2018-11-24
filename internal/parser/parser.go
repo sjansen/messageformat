@@ -3,6 +3,7 @@ package parser
 import (
 	"io"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/sjansen/messageformat/ast"
 	"github.com/sjansen/messageformat/errors"
@@ -66,12 +67,37 @@ type parser struct {
 }
 
 func (p *parser) parseMessageText() (*ast.Text, error) {
+	inQuote := false
 	var b strings.Builder
 	for p.dec.Decode() {
-		if ch := p.dec.Decoded(); ch == '{' {
-			break
+		ch := p.dec.Decoded()
+		if ch == '\'' {
+			next := p.dec.Peek()
+			if next == utf8.RuneError {
+				if !inQuote {
+					b.WriteRune('\'')
+				}
+				break
+			} else if next == '\'' {
+				b.WriteRune('\'')
+				p.dec.Decode()
+				next := p.dec.Peek()
+				if !inQuote && next == '{' {
+					break
+				}
+			} else if inQuote {
+				inQuote = false
+			} else if next == '{' || next == '}' {
+				inQuote = true
+			} else {
+				b.WriteRune('\'')
+			}
 		} else {
 			b.WriteRune(ch)
+			next := p.dec.Peek()
+			if next == '{' {
+				break
+			}
 		}
 	}
 	t := &ast.Text{Value: b.String()}
