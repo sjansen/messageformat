@@ -5,5 +5,5 @@ type PluralArg struct {
 	ArgID     string
 	Ordinal   bool
 	Offset    int
-	Nodes     map[string]Node
+	Messages  map[string]*Message
 }
