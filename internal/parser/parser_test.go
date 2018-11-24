@@ -10,7 +10,7 @@ import (
 
 func TestParse(t *testing.T) {
 	for idx, tc := range []struct {
-		input    string
+		pattern  string
 		expected *ast.Message
 	}{
 		{"Spoon!", &ast.Message{Nodes: []ast.Node{
@@ -94,7 +94,7 @@ func TestParse(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			require := require.New(t)
 
-			msg, err := Parse(tc.input)
+			msg, err := Parse(tc.pattern)
 			require.NoError(err)
 			require.Equal(tc.expected, msg)
 		})
@@ -103,7 +103,7 @@ func TestParse(t *testing.T) {
 
 func TestParseArgument(t *testing.T) {
 	for idx, tc := range []struct {
-		input    string
+		pattern  string
 		expected ast.Node
 	}{
 		{"{foo}",
@@ -139,7 +139,7 @@ func TestParseArgument(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.input)}
+			p := &parser{dec: NewDecoder(tc.pattern)}
 
 			actual, err := p.parseArgument(0)
 			require.NoError(err)
@@ -195,7 +195,7 @@ func TestParseMessage(t *testing.T) {
 
 func TestParseMessageText(t *testing.T) {
 	for idx, tc := range []struct {
-		input    string
+		pattern  string
 		expected *ast.Text
 	}{
 		{"Spoon!",
@@ -234,7 +234,7 @@ func TestParseMessageText(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.input)}
+			p := &parser{dec: NewDecoder(tc.pattern)}
 
 			actual, err := p.parseMessageText(0)
 			require.NoError(err)
