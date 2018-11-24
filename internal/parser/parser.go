@@ -2,6 +2,7 @@ package parser
 
 import (
 	"io"
+	"strings"
 
 	"github.com/sjansen/messageformat/ast"
 	"github.com/sjansen/messageformat/errors"
@@ -58,4 +59,21 @@ func parseArgument(l *lexer.Lexer) (ast.Node, error) {
 
 	arg := &ast.PlainArg{ArgID: argNameOrNumber}
 	return arg, nil
+}
+
+type parser struct {
+	dec *Decoder
+}
+
+func (p *parser) parseMessageText() (*ast.Text, error) {
+	var b strings.Builder
+	for p.dec.Decode() {
+		if ch := p.dec.Decoded(); ch == '{' {
+			break
+		} else {
+			b.WriteRune(ch)
+		}
+	}
+	t := &ast.Text{Value: b.String()}
+	return t, nil
 }
