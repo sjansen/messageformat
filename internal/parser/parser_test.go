@@ -142,10 +142,22 @@ func TestParseArgument(t *testing.T) {
 			ArgID:   "count",
 			Ordinal: true,
 			Messages: map[string]*ast.Message{
-				"one":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#st item"}}},
-				"two":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#nd item"}}},
-				"few":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#rd item"}}},
-				"other": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "#th item"}}},
+				"one": &ast.Message{Nodes: []ast.Node{
+					&ast.PluralValue{},
+					&ast.Text{Value: "st item"},
+				}},
+				"two": &ast.Message{Nodes: []ast.Node{
+					&ast.PluralValue{},
+					&ast.Text{Value: "nd item"},
+				}},
+				"few": &ast.Message{Nodes: []ast.Node{
+					&ast.PluralValue{},
+					&ast.Text{Value: "rd item"},
+				}},
+				"other": &ast.Message{Nodes: []ast.Node{
+					&ast.PluralValue{},
+					&ast.Text{Value: "th item"},
+				}},
 			}}},
 	} {
 		tc := tc
@@ -165,32 +177,42 @@ func TestParseArgument(t *testing.T) {
 func TestParseMessage(t *testing.T) {
 	for idx, tc := range []struct {
 		depth    int
+		inPlural bool
 		pattern  string
 		expected []ast.Node
 	}{
-		{0, "Spoon!", []ast.Node{
+		{0, false, "Spoon!", []ast.Node{
 			&ast.Text{Value: "Spoon!"},
 		}},
-		{1, "{Spoon!}", []ast.Node{
+		{1, false, "{Spoon!}", []ast.Node{
 			&ast.Text{Value: "Spoon!"},
 		}},
-		{0, "Hello, {audience}!", []ast.Node{
+		{0, false, "Hello, {audience}!", []ast.Node{
 			&ast.Text{Value: "Hello, "},
 			&ast.PlainArg{ArgID: "audience"},
 			&ast.Text{Value: "!"},
 		}},
-		{0, "{ greeting }, World!", []ast.Node{
+		{0, false, "{ greeting }, World!", []ast.Node{
 			&ast.PlainArg{ArgID: "greeting"},
 			&ast.Text{Value: ", World!"},
 		}},
-		{1, "{Hello, {audience}!}", []ast.Node{
+		{1, false, "{Hello, {audience}!}", []ast.Node{
 			&ast.Text{Value: "Hello, "},
 			&ast.PlainArg{ArgID: "audience"},
 			&ast.Text{Value: "!"},
 		}},
-		{1, "{{ greeting }, World!}", []ast.Node{
+		{1, false, "{{ greeting }, World!}", []ast.Node{
 			&ast.PlainArg{ArgID: "greeting"},
 			&ast.Text{Value: ", World!"},
+		}},
+		{1, false, "{The Internet is for #cats.}", []ast.Node{
+			&ast.Text{Value: "The Internet is for #cats."},
+		}},
+		{1, true, "{# {color} items}", []ast.Node{
+			&ast.PluralValue{},
+			&ast.Text{Value: " "},
+			&ast.PlainArg{ArgID: "color"},
+			&ast.Text{Value: " items"},
 		}},
 	} {
 		tc := tc
@@ -200,7 +222,7 @@ func TestParseMessage(t *testing.T) {
 
 			p := &parser{dec: NewDecoder(tc.pattern)}
 
-			actual, err := p.parseMessage(tc.depth)
+			actual, err := p.parseMessage(tc.depth, tc.inPlural)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
@@ -210,38 +232,51 @@ func TestParseMessage(t *testing.T) {
 func TestParseMessageText(t *testing.T) {
 	for idx, tc := range []struct {
 		pattern  string
+		inPlural bool
 		expected *ast.Text
 	}{
-		{"Spoon!",
+		{"Spoon!", false,
 			&ast.Text{Value: "Spoon!"}},
-		{"Hello, {audience}!",
+		{"Hello, {audience}!", false,
 			&ast.Text{Value: "Hello, "}},
-		{"It's peanut butter jelly time!",
+		{"It's peanut butter jelly time!", false,
 			&ast.Text{Value: "It's peanut butter jelly time!"}},
-		{"It''s peanut butter jelly time!",
+		{"It''s peanut butter jelly time!", false,
 			&ast.Text{Value: "It's peanut butter jelly time!"}},
-		{"trailing quote'",
+		{"trailing quote'", false,
 			&ast.Text{Value: "trailing quote'"}},
-		{"-'{foo}-",
+		{"-'{foo}-", false,
 			&ast.Text{Value: "-{foo}-"}},
-		{"-'{foo}'-",
+		{"-'{foo}'-", false,
 			&ast.Text{Value: "-{foo}-"}},
-		{"-'{foo}''-",
+		{"-'{foo}''-", false,
 			&ast.Text{Value: "-{foo}'-"}},
-		{"-'{foo}''-'",
+		{"-'{foo}''-'", false,
 			&ast.Text{Value: "-{foo}'-"}},
-		{"-''{foo}''-",
+		{"-''{foo}''-", false,
 			&ast.Text{Value: "-'"}},
-		{"-'''{foo}'''-",
+		{"-'''{foo}'''-", false,
 			&ast.Text{Value: "-'{foo}'-"}},
-		{"'-{foo}-'",
+		{"'-{foo}-'", false,
 			&ast.Text{Value: "'-"}},
-		{"'-'{foo}'-'",
+		{"'-'{foo}'-'", false,
 			&ast.Text{Value: "'-{foo}-'"}},
-		{"'-''{foo}''-'",
+		{"'-''{foo}''-'", false,
 			&ast.Text{Value: "'-'"}},
-		{"'-'''{foo}'''-'",
+		{"'-'''{foo}'''-'", false,
 			&ast.Text{Value: "'-'{foo}'-'"}},
+		{"We're #1!", false,
+			&ast.Text{Value: "We're #1!"}},
+		{"count: #", true,
+			&ast.Text{Value: "count: "}},
+		{"-'#'-", true,
+			&ast.Text{Value: "-#-"}},
+		{"-'#'-", false,
+			&ast.Text{Value: "-'#'-"}},
+		{"'{{ foo }}'", false,
+			&ast.Text{Value: "{{ foo }}"}},
+		{"'{# foo #}'", true,
+			&ast.Text{Value: "{# foo #}"}},
 	} {
 		tc := tc
 		label := strconv.Itoa(idx)
@@ -250,7 +285,7 @@ func TestParseMessageText(t *testing.T) {
 
 			p := &parser{dec: NewDecoder(tc.pattern)}
 
-			actual, err := p.parseMessageText(0)
+			actual, err := p.parseMessageText(0, tc.inPlural)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})

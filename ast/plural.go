@@ -7,3 +7,7 @@ type PluralArg struct {
 	Offset    int
 	Messages  map[string]*Message
 }
+
+type PluralValue struct {
+	Positions *Positions
+}

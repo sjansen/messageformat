@@ -10,7 +10,7 @@ import (
 
 func Parse(s string) (*ast.Message, error) {
 	p := &parser{dec: NewDecoder(s)}
-	if nodes, err := p.parseMessage(0); err != nil {
+	if nodes, err := p.parseMessage(0, false); err != nil {
 		return nil, err
 	} else {
 		msg := &ast.Message{Nodes: nodes}
@@ -91,7 +91,7 @@ func (p *parser) parseID() string {
 	return b.String()
 }
 
-func (p *parser) parseMessage(depth int) ([]ast.Node, error) {
+func (p *parser) parseMessage(depth int, inPlural bool) ([]ast.Node, error) {
 	nodes := []ast.Node{}
 	if depth > 0 {
 		if err := p.requireRune('{'); err != nil {
@@ -110,8 +110,11 @@ func (p *parser) parseMessage(depth int) ([]ast.Node, error) {
 				return nil, err
 			}
 			nodes = append(nodes, node)
+		} else if inPlural && next == '#' {
+			p.dec.Decode()
+			nodes = append(nodes, &ast.PluralValue{})
 		} else {
-			node, err := p.parseMessageText(depth)
+			node, err := p.parseMessageText(depth, inPlural)
 			if err != nil {
 				return nil, err
 			}
@@ -126,7 +129,7 @@ func (p *parser) parseMessage(depth int) ([]ast.Node, error) {
 	return nodes, nil
 }
 
-func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
+func (p *parser) parseMessageText(depth int, inPlural bool) (*ast.Text, error) {
 	inQuote := false
 	var b strings.Builder
 	for p.dec.Decode() {
@@ -145,20 +148,28 @@ func (p *parser) parseMessageText(depth int) (*ast.Text, error) {
 					next := p.dec.Peek()
 					if next == '{' || (depth > 0 && next == '}') {
 						break
+					} else if inPlural && next == '#' {
+						break
 					}
 				}
 			} else if inQuote {
 				inQuote = false
 			} else if next == '{' || next == '}' {
 				inQuote = true
+			} else if inPlural && next == '#' {
+				inQuote = true
 			} else {
 				b.WriteRune('\'')
 			}
 		} else {
 			b.WriteRune(ch)
-			next := p.dec.Peek()
-			if next == '{' || (depth > 0 && next == '}') {
-				break
+			if !inQuote {
+				next := p.dec.Peek()
+				if next == '{' || (depth > 0 && next == '}') {
+					break
+				} else if inPlural && next == '#' {
+					break
+				}
 			}
 		}
 	}
@@ -195,7 +206,7 @@ func (p *parser) parsePluralStyle(depth int) (map[string]*ast.Message, error) {
 		}
 		p.skipWhiteSpace()
 
-		if nodes, err := p.parseMessage(depth + 1); err != nil {
+		if nodes, err := p.parseMessage(depth+1, true); err != nil {
 			return nil, err
 		} else {
 			msg := &ast.Message{Nodes: nodes}
@@ -220,7 +231,7 @@ func (p *parser) parseSelectStyle(depth int) (map[string]*ast.Message, error) {
 		id := p.parseID()
 		p.skipWhiteSpace()
 
-		if nodes, err := p.parseMessage(depth + 1); err != nil {
+		if nodes, err := p.parseMessage(depth+1, false); err != nil {
 			return nil, err
 		} else {
 			msg := &ast.Message{Nodes: nodes}

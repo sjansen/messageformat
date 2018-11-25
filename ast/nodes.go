@@ -67,6 +67,26 @@ func (x *PluralArg) End() Position {
 	return Position{}
 }
 
+var _ Node = &PluralValue{}
+
+func (x *PluralValue) HasPositions() bool {
+	return x.Positions != nil
+}
+
+func (x *PluralValue) Begin() Position {
+	if x.Positions != nil {
+		return x.Positions.Begin
+	}
+	return Position{}
+}
+
+func (x *PluralValue) End() Position {
+	if x.Positions != nil {
+		return x.Positions.End
+	}
+	return Position{}
+}
+
 var _ Node = &SelectArg{}
 
 func (x *SelectArg) HasPositions() bool {
