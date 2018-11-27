@@ -143,19 +143,19 @@ func TestParseArgument(t *testing.T) {
 			Ordinal: true,
 			Messages: map[string]*ast.Message{
 				"one": &ast.Message{Nodes: []ast.Node{
-					&ast.PluralValue{},
+					&ast.NumberSign{},
 					&ast.Text{Value: "st item"},
 				}},
 				"two": &ast.Message{Nodes: []ast.Node{
-					&ast.PluralValue{},
+					&ast.NumberSign{},
 					&ast.Text{Value: "nd item"},
 				}},
 				"few": &ast.Message{Nodes: []ast.Node{
-					&ast.PluralValue{},
+					&ast.NumberSign{},
 					&ast.Text{Value: "rd item"},
 				}},
 				"other": &ast.Message{Nodes: []ast.Node{
-					&ast.PluralValue{},
+					&ast.NumberSign{},
 					&ast.Text{Value: "th item"},
 				}},
 			}}},
@@ -209,7 +209,7 @@ func TestParseMessage(t *testing.T) {
 			&ast.Text{Value: "The Internet is for #cats."},
 		}},
 		{1, true, "{# {color} items}", []ast.Node{
-			&ast.PluralValue{},
+			&ast.NumberSign{},
 			&ast.Text{Value: " "},
 			&ast.PlainArg{ArgID: "color"},
 			&ast.Text{Value: " items"},

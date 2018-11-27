@@ -27,6 +27,26 @@ func (x *Text) End() Position {
 	return Position{}
 }
 
+var _ Node = &NumberSign{}
+
+func (x *NumberSign) HasPositions() bool {
+	return x.Positions != nil
+}
+
+func (x *NumberSign) Begin() Position {
+	if x.Positions != nil {
+		return x.Positions.Begin
+	}
+	return Position{}
+}
+
+func (x *NumberSign) End() Position {
+	if x.Positions != nil {
+		return x.Positions.End
+	}
+	return Position{}
+}
+
 var _ Node = &PlainArg{}
 
 func (x *PlainArg) HasPositions() bool {
@@ -61,26 +81,6 @@ func (x *PluralArg) Begin() Position {
 }
 
 func (x *PluralArg) End() Position {
-	if x.Positions != nil {
-		return x.Positions.End
-	}
-	return Position{}
-}
-
-var _ Node = &PluralValue{}
-
-func (x *PluralValue) HasPositions() bool {
-	return x.Positions != nil
-}
-
-func (x *PluralValue) Begin() Position {
-	if x.Positions != nil {
-		return x.Positions.Begin
-	}
-	return Position{}
-}
-
-func (x *PluralValue) End() Position {
 	if x.Positions != nil {
 		return x.Positions.End
 	}

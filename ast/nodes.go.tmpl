@@ -6,7 +6,7 @@ type Node struct {
 }
 */
 
-{{ range $type := split "Text,PlainArg,PluralArg,PluralValue,SelectArg,SimpleArg" }}
+{{ range $type := split "Text,NumberSign,PlainArg,PluralArg,SelectArg,SimpleArg" }}
 var _ Node = &{{ $type }}{}
 
 func (x *{{ $type }}) HasPositions() bool {

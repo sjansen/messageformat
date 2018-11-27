@@ -108,7 +108,7 @@ func parseMessage(dec *Decoder, depth int, inPlural bool) ([]ast.Node, error) {
 			nodes = append(nodes, node)
 		} else if inPlural && next == '#' {
 			dec.Decode()
-			nodes = append(nodes, &ast.PluralValue{})
+			nodes = append(nodes, &ast.NumberSign{})
 		} else {
 			node, err := parseMessageText(dec, depth, inPlural)
 			if err != nil {
