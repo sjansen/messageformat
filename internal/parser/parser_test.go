@@ -165,9 +165,9 @@ func TestParseArgument(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.pattern)}
+			dec := NewDecoder(tc.pattern)
 
-			actual, err := p.parseArgument(0)
+			actual, err := parseArgument(dec, 0)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
@@ -220,9 +220,9 @@ func TestParseMessage(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.pattern)}
+			dec := NewDecoder(tc.pattern)
 
-			actual, err := p.parseMessage(tc.depth, tc.inPlural)
+			actual, err := parseMessage(dec, tc.depth, tc.inPlural)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
@@ -283,9 +283,9 @@ func TestParseMessageText(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			p := &parser{dec: NewDecoder(tc.pattern)}
+			dec := NewDecoder(tc.pattern)
 
-			actual, err := p.parseMessageText(0, tc.inPlural)
+			actual, err := parseMessageText(dec, 0, tc.inPlural)
 			require.NoError(err)
 			require.Equal(tc.expected, actual)
 		})
