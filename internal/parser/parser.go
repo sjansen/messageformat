@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/sjansen/messageformat/ast"
@@ -80,7 +81,7 @@ func parseID(dec *Decoder) string {
 		ch := dec.Decoded()
 		b.WriteRune(ch)
 		next := dec.Peek()
-		if isPatternWhiteSpace(next) || isPatternSyntax(next) {
+		if unicode.In(next, unicode.Pattern_White_Space, unicode.Pattern_Syntax) {
 			break
 		}
 	}
@@ -192,7 +193,7 @@ func parsePluralStyle(dec *Decoder, depth int) (map[string]*ast.Message, error) 
 			for dec.Decode() {
 				ch := dec.Decoded()
 				b.WriteRune(ch)
-				if next := dec.Peek(); !isDigit(next) {
+				if next := dec.Peek(); next < '0' || next > '9' {
 					break
 				}
 			}
@@ -268,7 +269,7 @@ func requireRune(dec *Decoder, token rune) error {
 }
 
 func skipWhiteSpace(dec *Decoder) {
-	for next := dec.Peek(); isPatternWhiteSpace(next); next = dec.Peek() {
+	for next := dec.Peek(); unicode.In(next, unicode.Pattern_White_Space); next = dec.Peek() {
 		if !dec.Decode() {
 			break
 		}
