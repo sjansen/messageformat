@@ -1,4 +1,4 @@
-package parser
+package decoder
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 func TestDecoder(t *testing.T) {
 	require := require.New(t)
 
-	d := NewDecoder("cão")
+	d := New("cão")
 	expected := []rune{'c', 'ã', 'o'}
 	for _, ch := range expected {
 		require.True(d.Decode())

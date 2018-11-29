@@ -1,4 +1,4 @@
-package parser
+package decoder
 
 import "unicode/utf8"
 
@@ -12,7 +12,7 @@ type Decoder struct {
 	nextSize int
 }
 
-func NewDecoder(s string) *Decoder {
+func New(s string) *Decoder {
 	ch, size := utf8.DecodeRuneInString(s)
 	return &Decoder{
 		src:      s,

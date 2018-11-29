@@ -7,10 +7,11 @@ import (
 
 	"github.com/sjansen/messageformat/ast"
 	"github.com/sjansen/messageformat/errors"
+	"github.com/sjansen/messageformat/internal/decoder"
 )
 
 func Parse(s string) (*ast.Message, error) {
-	dec := NewDecoder(s)
+	dec := decoder.New(s)
 	if nodes, err := parseMessage(dec, 0, false); err != nil {
 		return nil, err
 	} else {
@@ -19,7 +20,7 @@ func Parse(s string) (*ast.Message, error) {
 	}
 }
 
-func parseArgument(dec *Decoder, depth int) (ast.Node, error) {
+func parseArgument(dec *decoder.Decoder, depth int) (ast.Node, error) {
 	if err := requireRune(dec, '{'); err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func parseArgument(dec *Decoder, depth int) (ast.Node, error) {
 	return arg, nil
 }
 
-func parseID(dec *Decoder) string {
+func parseID(dec *decoder.Decoder) string {
 	var b strings.Builder
 	for dec.Decode() {
 		ch := dec.Decoded()
@@ -88,7 +89,7 @@ func parseID(dec *Decoder) string {
 	return b.String()
 }
 
-func parseMessage(dec *Decoder, depth int, inPlural bool) ([]ast.Node, error) {
+func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Node, error) {
 	nodes := []ast.Node{}
 	if depth > 0 {
 		if err := requireRune(dec, '{'); err != nil {
@@ -126,7 +127,7 @@ func parseMessage(dec *Decoder, depth int, inPlural bool) ([]ast.Node, error) {
 	return nodes, nil
 }
 
-func parseMessageText(dec *Decoder, depth int, inPlural bool) (*ast.Text, error) {
+func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text, error) {
 	inQuote := false
 	var b strings.Builder
 	for dec.Decode() {
@@ -174,7 +175,7 @@ func parseMessageText(dec *Decoder, depth int, inPlural bool) (*ast.Text, error)
 	return t, nil
 }
 
-func parsePluralStyle(dec *Decoder, depth int) (map[string]*ast.Message, error) {
+func parsePluralStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message, error) {
 	skipWhiteSpace(dec)
 	if err := requireRune(dec, ','); err != nil {
 		return nil, err
@@ -212,7 +213,7 @@ func parsePluralStyle(dec *Decoder, depth int) (map[string]*ast.Message, error) 
 	}
 }
 
-func parseSelectStyle(dec *Decoder, depth int) (map[string]*ast.Message, error) {
+func parseSelectStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message, error) {
 	skipWhiteSpace(dec)
 	if err := requireRune(dec, ','); err != nil {
 		return nil, err
@@ -237,7 +238,7 @@ func parseSelectStyle(dec *Decoder, depth int) (map[string]*ast.Message, error) 
 	}
 }
 
-func parseSimpleStyle(dec *Decoder, depth int) (ast.ArgStyle, error) {
+func parseSimpleStyle(dec *decoder.Decoder, depth int) (ast.ArgStyle, error) {
 	skipWhiteSpace(dec)
 	next := dec.Peek()
 	if next == '}' {
@@ -259,7 +260,7 @@ func parseSimpleStyle(dec *Decoder, depth int) (ast.ArgStyle, error) {
 	return argStyle, nil
 }
 
-func requireRune(dec *Decoder, token rune) error {
+func requireRune(dec *decoder.Decoder, token rune) error {
 	dec.Decode()
 	ch := dec.Decoded()
 	if ch == token {
@@ -268,7 +269,7 @@ func requireRune(dec *Decoder, token rune) error {
 	return &errors.UnexpectedToken{Token: string(ch)}
 }
 
-func skipWhiteSpace(dec *Decoder) {
+func skipWhiteSpace(dec *decoder.Decoder) {
 	for next := dec.Peek(); unicode.In(next, unicode.Pattern_White_Space); next = dec.Peek() {
 		if !dec.Decode() {
 			break

@@ -4,8 +4,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/sjansen/messageformat/ast"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sjansen/messageformat/ast"
+	"github.com/sjansen/messageformat/internal/decoder"
 )
 
 func TestParse(t *testing.T) {
@@ -165,7 +167,7 @@ func TestParseArgument(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			dec := NewDecoder(tc.pattern)
+			dec := decoder.New(tc.pattern)
 
 			actual, err := parseArgument(dec, 0)
 			require.NoError(err)
@@ -220,7 +222,7 @@ func TestParseMessage(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			dec := NewDecoder(tc.pattern)
+			dec := decoder.New(tc.pattern)
 
 			actual, err := parseMessage(dec, tc.depth, tc.inPlural)
 			require.NoError(err)
@@ -283,7 +285,7 @@ func TestParseMessageText(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			require := require.New(t)
 
-			dec := NewDecoder(tc.pattern)
+			dec := decoder.New(tc.pattern)
 
 			actual, err := parseMessageText(dec, 0, tc.inPlural)
 			require.NoError(err)
