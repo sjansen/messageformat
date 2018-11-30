@@ -12,15 +12,15 @@ import (
 
 func Parse(s string) (*ast.Message, error) {
 	dec := decoder.New(s)
-	if nodes, err := parseMessage(dec, 0, false); err != nil {
+	if parts, err := parseMessage(dec, 0, false); err != nil {
 		return nil, err
 	} else {
-		msg := &ast.Message{Nodes: nodes}
+		msg := &ast.Message{Parts: parts}
 		return msg, nil
 	}
 }
 
-func parseArgument(dec *decoder.Decoder, depth int) (ast.Node, error) {
+func parseArgument(dec *decoder.Decoder, depth int) (ast.Part, error) {
 	if err := requireRune(dec, '{'); err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func parseArgument(dec *decoder.Decoder, depth int) (ast.Node, error) {
 		return nil, &errors.UnexpectedToken{Token: string(ch)}
 	}
 
-	var arg ast.Node
+	var arg ast.Part
 	if keyword := parseID(dec); keyword == "select" {
 		messages, err := parseSelectStyle(dec, depth)
 		if err != nil {
@@ -89,8 +89,8 @@ func parseID(dec *decoder.Decoder) string {
 	return b.String()
 }
 
-func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Node, error) {
-	nodes := []ast.Node{}
+func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Part, error) {
+	parts := []ast.Part{}
 	if depth > 0 {
 		if err := requireRune(dec, '{'); err != nil {
 			return nil, err
@@ -103,20 +103,20 @@ func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Node, e
 		} else if depth > 0 && next == '}' {
 			break
 		} else if next == '{' {
-			node, err := parseArgument(dec, depth)
+			part, err := parseArgument(dec, depth)
 			if err != nil {
 				return nil, err
 			}
-			nodes = append(nodes, node)
+			parts = append(parts, part)
 		} else if inPlural && next == '#' {
 			dec.Decode()
-			nodes = append(nodes, &ast.NumberSign{})
+			parts = append(parts, &ast.NumberSign{})
 		} else {
-			node, err := parseMessageText(dec, depth, inPlural)
+			part, err := parseMessageText(dec, depth, inPlural)
 			if err != nil {
 				return nil, err
 			}
-			nodes = append(nodes, node)
+			parts = append(parts, part)
 		}
 	}
 	if depth > 0 {
@@ -124,7 +124,7 @@ func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Node, e
 			return nil, err
 		}
 	}
-	return nodes, nil
+	return parts, nil
 }
 
 func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text, error) {
@@ -204,10 +204,10 @@ func parsePluralStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message,
 		}
 		skipWhiteSpace(dec)
 
-		if nodes, err := parseMessage(dec, depth+1, true); err != nil {
+		if parts, err := parseMessage(dec, depth+1, true); err != nil {
 			return nil, err
 		} else {
-			msg := &ast.Message{Nodes: nodes}
+			msg := &ast.Message{Parts: parts}
 			messages[id] = msg
 		}
 	}
@@ -229,10 +229,10 @@ func parseSelectStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message,
 		id := parseID(dec)
 		skipWhiteSpace(dec)
 
-		if nodes, err := parseMessage(dec, depth+1, false); err != nil {
+		if parts, err := parseMessage(dec, depth+1, false); err != nil {
 			return nil, err
 		} else {
-			msg := &ast.Message{Nodes: nodes}
+			msg := &ast.Message{Parts: parts}
 			messages[id] = msg
 		}
 	}

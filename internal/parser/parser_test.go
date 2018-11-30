@@ -15,57 +15,57 @@ func TestParse(t *testing.T) {
 		pattern  string
 		expected *ast.Message
 	}{
-		{"Spoon!", &ast.Message{Nodes: []ast.Node{
+		{"Spoon!", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "Spoon!"},
 		}}},
-		{"Olá mundo!", &ast.Message{Nodes: []ast.Node{
+		{"Olá mundo!", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "Olá mundo!"},
 		}}},
-		{"Hello, {audience}!", &ast.Message{Nodes: []ast.Node{
+		{"Hello, {audience}!", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "Hello, "},
 			&ast.PlainArg{ArgID: "audience"},
 			&ast.Text{Value: "!"},
 		}}},
-		{"{ greeting }, World!", &ast.Message{Nodes: []ast.Node{
+		{"{ greeting }, World!", &ast.Message{Parts: []ast.Part{
 			&ast.PlainArg{ArgID: "greeting"},
 			&ast.Text{Value: ", World!"},
 		}}},
-		{"It's peanut butter jelly time!", &ast.Message{Nodes: []ast.Node{
+		{"It's peanut butter jelly time!", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "It's peanut butter jelly time!"},
 		}}},
-		{"It''s peanut butter jelly time!", &ast.Message{Nodes: []ast.Node{
+		{"It''s peanut butter jelly time!", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "It's peanut butter jelly time!"},
 		}}},
-		{"'-'''{-''-}'''-'", &ast.Message{Nodes: []ast.Node{
+		{"'-'''{-''-}'''-'", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "'-'{-'-}'-'"},
 		}}},
-		{"From: {begin}\nUntil: {end}", &ast.Message{Nodes: []ast.Node{
+		{"From: {begin}\nUntil: {end}", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "From: "},
 			&ast.PlainArg{ArgID: "begin"},
 			&ast.Text{Value: "\nUntil: "},
 			&ast.PlainArg{ArgID: "end"},
 		}}},
-		{"From: {begin,date}\nUntil: {end,date,short}", &ast.Message{Nodes: []ast.Node{
+		{"From: {begin,date}\nUntil: {end,date,short}", &ast.Message{Parts: []ast.Part{
 			&ast.Text{Value: "From: "},
 			&ast.SimpleArg{ArgID: "begin", ArgType: ast.DateType},
 			&ast.Text{Value: "\nUntil: "},
 			&ast.SimpleArg{ArgID: "end", ArgType: ast.DateType, ArgStyle: ast.ShortStyle},
 		}}},
 		{"{timespan, select, afternoon{Boa tarde, {name}.} evening{Boa noite, {name}.} other{Bom dia, {name}.}}",
-			&ast.Message{Nodes: []ast.Node{
+			&ast.Message{Parts: []ast.Part{
 				&ast.SelectArg{ArgID: "timespan",
 					Messages: map[string]*ast.Message{
-						"afternoon": &ast.Message{Nodes: []ast.Node{
+						"afternoon": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Boa tarde, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
 						}},
-						"evening": &ast.Message{Nodes: []ast.Node{
+						"evening": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Boa noite, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
 						}},
-						"other": &ast.Message{Nodes: []ast.Node{
+						"other": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Bom dia, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
@@ -73,16 +73,16 @@ func TestParse(t *testing.T) {
 					}},
 			}}},
 		{"{ timespan,select, afternoon{Boa tarde} evening{Boa noite} other{Bom dia} }, {name}.",
-			&ast.Message{Nodes: []ast.Node{
+			&ast.Message{Parts: []ast.Part{
 				&ast.SelectArg{ArgID: "timespan",
 					Messages: map[string]*ast.Message{
-						"afternoon": &ast.Message{Nodes: []ast.Node{
+						"afternoon": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Boa tarde"},
 						}},
-						"evening": &ast.Message{Nodes: []ast.Node{
+						"evening": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Boa noite"},
 						}},
-						"other": &ast.Message{Nodes: []ast.Node{
+						"other": &ast.Message{Parts: []ast.Part{
 							&ast.Text{Value: "Bom dia"},
 						}},
 					}},
@@ -106,7 +106,7 @@ func TestParse(t *testing.T) {
 func TestParseArgument(t *testing.T) {
 	for idx, tc := range []struct {
 		pattern  string
-		expected ast.Node
+		expected ast.Part
 	}{
 		{"{0}",
 			&ast.PlainArg{ArgID: "0"}},
@@ -125,16 +125,16 @@ func TestParseArgument(t *testing.T) {
 		{"{6,select,afternoon{Boa tarde!}evening{Boa noite!}other{Bom dia!}}", &ast.SelectArg{
 			ArgID: "6",
 			Messages: map[string]*ast.Message{
-				"afternoon": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Boa tarde!"}}},
-				"evening":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Boa noite!"}}},
-				"other":     &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "Bom dia!"}}},
+				"afternoon": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Boa tarde!"}}},
+				"evening":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Boa noite!"}}},
+				"other":     &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Bom dia!"}}},
 			}}},
 		{"{7,plural,=0{no elves}one{one elf}other{multiple elves}}", &ast.PluralArg{
 			ArgID: "7",
 			Messages: map[string]*ast.Message{
-				"=0":    &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "no elves"}}},
-				"one":   &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "one elf"}}},
-				"other": &ast.Message{Nodes: []ast.Node{&ast.Text{Value: "multiple elves"}}},
+				"=0":    &ast.Message{Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
+				"one":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
+				"other": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
 			}}},
 		{`{ count, selectordinal,
 		    one {#st item}
@@ -144,19 +144,19 @@ func TestParseArgument(t *testing.T) {
 			ArgID:   "count",
 			Ordinal: true,
 			Messages: map[string]*ast.Message{
-				"one": &ast.Message{Nodes: []ast.Node{
+				"one": &ast.Message{Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "st item"},
 				}},
-				"two": &ast.Message{Nodes: []ast.Node{
+				"two": &ast.Message{Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "nd item"},
 				}},
-				"few": &ast.Message{Nodes: []ast.Node{
+				"few": &ast.Message{Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "rd item"},
 				}},
-				"other": &ast.Message{Nodes: []ast.Node{
+				"other": &ast.Message{Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "th item"},
 				}},
@@ -181,36 +181,36 @@ func TestParseMessage(t *testing.T) {
 		depth    int
 		inPlural bool
 		pattern  string
-		expected []ast.Node
+		expected []ast.Part
 	}{
-		{0, false, "Spoon!", []ast.Node{
+		{0, false, "Spoon!", []ast.Part{
 			&ast.Text{Value: "Spoon!"},
 		}},
-		{1, false, "{Spoon!}", []ast.Node{
+		{1, false, "{Spoon!}", []ast.Part{
 			&ast.Text{Value: "Spoon!"},
 		}},
-		{0, false, "Hello, {audience}!", []ast.Node{
+		{0, false, "Hello, {audience}!", []ast.Part{
 			&ast.Text{Value: "Hello, "},
 			&ast.PlainArg{ArgID: "audience"},
 			&ast.Text{Value: "!"},
 		}},
-		{0, false, "{ greeting }, World!", []ast.Node{
+		{0, false, "{ greeting }, World!", []ast.Part{
 			&ast.PlainArg{ArgID: "greeting"},
 			&ast.Text{Value: ", World!"},
 		}},
-		{1, false, "{Hello, {audience}!}", []ast.Node{
+		{1, false, "{Hello, {audience}!}", []ast.Part{
 			&ast.Text{Value: "Hello, "},
 			&ast.PlainArg{ArgID: "audience"},
 			&ast.Text{Value: "!"},
 		}},
-		{1, false, "{{ greeting }, World!}", []ast.Node{
+		{1, false, "{{ greeting }, World!}", []ast.Part{
 			&ast.PlainArg{ArgID: "greeting"},
 			&ast.Text{Value: ", World!"},
 		}},
-		{1, false, "{The Internet is for #cats.}", []ast.Node{
+		{1, false, "{The Internet is for #cats.}", []ast.Part{
 			&ast.Text{Value: "The Internet is for #cats."},
 		}},
-		{1, true, "{# {color} items}", []ast.Node{
+		{1, true, "{# {color} items}", []ast.Part{
 			&ast.NumberSign{},
 			&ast.Text{Value: " "},
 			&ast.PlainArg{ArgID: "color"},

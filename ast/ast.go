@@ -1,12 +1,12 @@
 package ast
 
-//go:generate go run ../scripts/tmpl-to-go/main.go nodes.go.tmpl
+//go:generate go run ../scripts/tmpl-to-go/main.go parts.go.tmpl
 
 type Message struct {
-	Nodes []Node
+	Parts []Part
 }
 
-type Node interface {
+type Part interface {
 	HasPositions() bool
 	Begin() Position
 	End() Position

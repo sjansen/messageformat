@@ -2,12 +2,12 @@
 package ast
 
 /*
-type Node struct {
+type Part struct {
 	Positions *Positions
 }
 */
 
-var _ Node = &Text{}
+var _ Part = &Text{}
 
 func (x *Text) HasPositions() bool {
 	return x.Positions != nil
@@ -27,7 +27,7 @@ func (x *Text) End() Position {
 	return Position{}
 }
 
-var _ Node = &NumberSign{}
+var _ Part = &NumberSign{}
 
 func (x *NumberSign) HasPositions() bool {
 	return x.Positions != nil
@@ -47,7 +47,7 @@ func (x *NumberSign) End() Position {
 	return Position{}
 }
 
-var _ Node = &PlainArg{}
+var _ Part = &PlainArg{}
 
 func (x *PlainArg) HasPositions() bool {
 	return x.Positions != nil
@@ -67,7 +67,7 @@ func (x *PlainArg) End() Position {
 	return Position{}
 }
 
-var _ Node = &PluralArg{}
+var _ Part = &PluralArg{}
 
 func (x *PluralArg) HasPositions() bool {
 	return x.Positions != nil
@@ -87,7 +87,7 @@ func (x *PluralArg) End() Position {
 	return Position{}
 }
 
-var _ Node = &SelectArg{}
+var _ Part = &SelectArg{}
 
 func (x *SelectArg) HasPositions() bool {
 	return x.Positions != nil
@@ -107,7 +107,7 @@ func (x *SelectArg) End() Position {
 	return Position{}
 }
 
-var _ Node = &SimpleArg{}
+var _ Part = &SimpleArg{}
 
 func (x *SimpleArg) HasPositions() bool {
 	return x.Positions != nil

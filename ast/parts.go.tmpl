@@ -1,13 +1,13 @@
 package ast
 
 /*
-type Node struct {
+type Part struct {
 	Positions *Positions
 }
 */
 
 {{ range $type := split "Text,NumberSign,PlainArg,PluralArg,SelectArg,SimpleArg" }}
-var _ Node = &{{ $type }}{}
+var _ Part = &{{ $type }}{}
 
 func (x *{{ $type }}) HasPositions() bool {
 	return x.Positions != nil
