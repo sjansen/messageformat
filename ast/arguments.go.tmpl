@@ -1,0 +1,15 @@
+package ast
+
+/*
+type Argument struct {
+	ArgID  string
+}
+*/
+
+{{ range $type := split "PlainArg,PluralArg,SelectArg,SimpleArg" }}
+var _ Argument = &{{ $type }}{}
+
+func (x *{{ $type }}) ArgNameOrNumber() string {
+	return x.ArgID
+}
+{{ end }}
