@@ -15,7 +15,7 @@ type selectArg struct {
 func newSelectArg(s *ast.SelectArg) (*selectArg, error) {
 	messages := make(map[string]*Message, len(s.Messages))
 	for k, v := range s.Messages {
-		if msg, err := Compile(v); err != nil {
+		if msg, err := compile(v, nil); err != nil {
 			return nil, err
 		} else {
 			messages[k] = msg

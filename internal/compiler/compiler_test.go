@@ -29,6 +29,30 @@ var hello = &ast.Message{Parts: []ast.Part{
 		}},
 }}
 
+var items = &ast.Message{Parts: []ast.Part{
+	&ast.PluralArg{
+		ArgID:   "count",
+		Ordinal: true,
+		Messages: map[string]*ast.Message{
+			"one": &ast.Message{Parts: []ast.Part{
+				&ast.NumberSign{},
+				&ast.Text{Value: "st item"},
+			}},
+			"two": &ast.Message{Parts: []ast.Part{
+				&ast.NumberSign{},
+				&ast.Text{Value: "nd item"},
+			}},
+			"few": &ast.Message{Parts: []ast.Part{
+				&ast.NumberSign{},
+				&ast.Text{Value: "rd item"},
+			}},
+			"other": &ast.Message{Parts: []ast.Part{
+				&ast.NumberSign{},
+				&ast.Text{Value: "th item"},
+			}},
+		}},
+}}
+
 func TestCompileAndFormat(t *testing.T) {
 	require := require.New(t)
 
@@ -50,6 +74,22 @@ func TestCompileAndFormat(t *testing.T) {
 		hello, map[string]interface{}{
 			"name":     "Eve",
 			"timespan": "evening",
+		},
+	}, {`1st item`,
+		items, map[string]interface{}{
+			"count": 1,
+		},
+	}, {`2nd item`,
+		items, map[string]interface{}{
+			"count": 2,
+		},
+	}, {`3rd item`,
+		items, map[string]interface{}{
+			"count": 3,
+		},
+	}, {`4th item`,
+		items, map[string]interface{}{
+			"count": 4,
 		}},
 	} {
 		compiled, err := Compile(tc.message)
