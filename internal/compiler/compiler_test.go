@@ -53,6 +53,16 @@ var items = &ast.Message{Parts: []ast.Part{
 		}},
 }}
 
+var elves = &ast.Message{Parts: []ast.Part{
+	&ast.PluralArg{
+		ArgID: "count",
+		Messages: map[string]*ast.Message{
+			"=0":    &ast.Message{Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
+			"one":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
+			"other": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
+		}},
+}}
+
 func TestCompileAndFormat(t *testing.T) {
 	require := require.New(t)
 
@@ -90,8 +100,20 @@ func TestCompileAndFormat(t *testing.T) {
 	}, {`4th item`,
 		items, map[string]interface{}{
 			"count": 4,
-		}},
-	} {
+		},
+	}, {`no elves`,
+		elves, map[string]interface{}{
+			"count": 0,
+		},
+	}, {`one elf`,
+		elves, map[string]interface{}{
+			"count": 1,
+		},
+	}, {`multiple elves`,
+		elves, map[string]interface{}{
+			"count": 2,
+		},
+	}} {
 		compiled, err := Compile(tc.message)
 		require.NoError(err)
 

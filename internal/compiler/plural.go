@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/text/feature/plural"
+	"golang.org/x/text/language"
+
 	"github.com/sjansen/messageformat/ast"
 )
 
@@ -68,20 +71,37 @@ func (p *pluralArg) format(b *strings.Builder, arguments map[string]interface{})
 		return fmt.Errorf("expected int got: %T", value)
 	}
 
-	category := "other"
-	switch n {
-	case 1:
+	category := fmt.Sprintf("=%d", n)
+	if msg, ok := p.Messages[category]; ok {
+		return msg.format(b, arguments)
+	}
+
+	var form plural.Form
+	lang := language.MustParse("en")
+	if p.Ordinal {
+		form = plural.Ordinal.MatchPlural(lang, n, 0, 0, 0, 0)
+	} else {
+		form = plural.Cardinal.MatchPlural(lang, n, 0, 0, 0, 0)
+	}
+
+	category = "other"
+	switch form {
+	case plural.Zero:
+		category = "zero"
+	case plural.One:
 		category = "one"
-	case 2:
+	case plural.Two:
 		category = "two"
-	case 3:
+	case plural.Few:
 		category = "few"
+	case plural.Many:
+		category = "many"
 	}
 
-	msg, ok := p.Messages[category]
-	if !ok {
-		msg = p.Messages["other"]
+	if msg, ok := p.Messages[category]; ok {
+		return msg.format(b, arguments)
 	}
 
+	msg := p.Messages["other"]
 	return msg.format(b, arguments)
 }
