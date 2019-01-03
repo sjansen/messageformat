@@ -35,19 +35,19 @@ func TestCompileAndFormat(t *testing.T) {
 	for _, tc := range []struct {
 		expected  string
 		message   *ast.Message
-		arguments map[string]string
+		arguments map[string]interface{}
 	}{{`Bom dia, Alice.`,
-		hello, map[string]string{
+		hello, map[string]interface{}{
 			"name":     "Alice",
 			"timespan": "other",
 		},
 	}, {`Boa tarde, Bob.`,
-		hello, map[string]string{
+		hello, map[string]interface{}{
 			"name":     "Bob",
 			"timespan": "afternoon",
 		},
 	}, {`Boa noite, Eve.`,
-		hello, map[string]string{
+		hello, map[string]interface{}{
 			"name":     "Eve",
 			"timespan": "evening",
 		}},

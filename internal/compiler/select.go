@@ -27,12 +27,16 @@ func newSelectArg(s *ast.SelectArg) (*selectArg, error) {
 	}, nil
 }
 
-func (s *selectArg) format(b *strings.Builder, arguments map[string]string) error {
+func (s *selectArg) format(b *strings.Builder, arguments map[string]interface{}) error {
 	value, ok := arguments[s.ArgID]
 	if !ok {
 		return fmt.Errorf("missing arg: %q", s.ArgID)
 	}
-	msg, ok := s.Messages[value]
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("expected string got: %T", value)
+	}
+	msg, ok := s.Messages[str]
 	if !ok {
 		return fmt.Errorf("unmatched select: %q", value)
 	}

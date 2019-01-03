@@ -7,10 +7,10 @@ type Message struct {
 }
 
 type part interface {
-	format(*strings.Builder, map[string]string) error
+	format(*strings.Builder, map[string]interface{}) error
 }
 
-func (m *Message) Format(arguments map[string]string) (string, error) {
+func (m *Message) Format(arguments map[string]interface{}) (string, error) {
 	var b strings.Builder
 	if err := m.format(&b, arguments); err != nil {
 		return "", err
@@ -18,7 +18,7 @@ func (m *Message) Format(arguments map[string]string) (string, error) {
 	return b.String(), nil
 }
 
-func (m *Message) format(b *strings.Builder, arguments map[string]string) error {
+func (m *Message) format(b *strings.Builder, arguments map[string]interface{}) error {
 	for _, part := range m.parts {
 		if err := part.format(b, arguments); err != nil {
 			return err
