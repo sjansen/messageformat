@@ -5,17 +5,18 @@ import (
 	"strings"
 
 	"github.com/sjansen/messageformat/ast"
+	"golang.org/x/text/language"
 )
 
 type plainArg struct {
 	ArgID string
 }
 
-func newPlainArg(p *ast.PlainArg) (*plainArg, error) {
+func newPlainArg(lang language.Tag, p *ast.PlainArg) (*plainArg, error) {
 	return &plainArg{ArgID: p.ArgID}, nil
 }
 
-func (p *plainArg) format(b *strings.Builder, arguments map[string]interface{}) error {
+func (p *plainArg) format(b *strings.Builder, lang language.Tag, arguments map[string]interface{}) error {
 	value, ok := arguments[p.ArgID]
 	if !ok {
 		return fmt.Errorf("missing arg: %q", p.ArgID)

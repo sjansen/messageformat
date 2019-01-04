@@ -4,13 +4,18 @@ import (
 	"fmt"
 
 	"github.com/sjansen/messageformat/ast"
+	"golang.org/x/text/language"
 )
 
-func Compile(msg *ast.Message) (*Message, error) {
-	return compile(msg, nil)
+func Compile(lang string, msg *ast.Message) (*Message, error) {
+	tag, err := language.Parse(lang)
+	if err != nil {
+		return nil, err
+	}
+	return compile(tag, msg, nil)
 }
 
-func compile(msg *ast.Message, n *numberSign) (*Message, error) {
+func compile(lang language.Tag, msg *ast.Message, n *numberSign) (*Message, error) {
 	parts := make([]part, 0, len(msg.Parts))
 	for _, part := range msg.Parts {
 		switch x := part.(type) {
@@ -21,30 +26,30 @@ func compile(msg *ast.Message, n *numberSign) (*Message, error) {
 				parts = append(parts, n)
 			}
 		case *ast.PlainArg:
-			if tmp, err := newPlainArg(x); err != nil {
+			if tmp, err := newPlainArg(lang, x); err != nil {
 				return nil, err
 			} else {
 				parts = append(parts, tmp)
 			}
 		case *ast.PluralArg:
-			if tmp, err := newPluralArg(x); err != nil {
+			if tmp, err := newPluralArg(lang, x); err != nil {
 				return nil, err
 			} else {
 				parts = append(parts, tmp)
 			}
 		case *ast.SelectArg:
-			if tmp, err := newSelectArg(x); err != nil {
+			if tmp, err := newSelectArg(lang, x); err != nil {
 				return nil, err
 			} else {
 				parts = append(parts, tmp)
 			}
 		case *ast.Text:
-			if tmp, err := newText(x); err != nil {
+			if tmp, err := newText(lang, x); err != nil {
 				return nil, err
 			} else {
 				parts = append(parts, tmp)
 			}
 		}
 	}
-	return &Message{parts: parts}, nil
+	return &Message{lang: lang, parts: parts}, nil
 }

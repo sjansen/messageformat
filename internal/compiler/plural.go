@@ -23,7 +23,7 @@ type pluralArg struct {
 	Messages map[string]*Message
 }
 
-func (n *numberSign) format(b *strings.Builder, arguments map[string]interface{}) error {
+func (n *numberSign) format(b *strings.Builder, lang language.Tag, arguments map[string]interface{}) error {
 	value, ok := arguments[n.ArgID]
 	if !ok {
 		return fmt.Errorf("missing arg: %q", n.ArgID)
@@ -36,7 +36,7 @@ func (n *numberSign) format(b *strings.Builder, arguments map[string]interface{}
 	return nil
 }
 
-func newPluralArg(p *ast.PluralArg) (*pluralArg, error) {
+func newPluralArg(lang language.Tag, p *ast.PluralArg) (*pluralArg, error) {
 	if _, ok := p.Messages["other"]; !ok {
 		return nil, fmt.Errorf(`missing required plural category: "other"`)
 	}
@@ -46,7 +46,7 @@ func newPluralArg(p *ast.PluralArg) (*pluralArg, error) {
 	}
 	messages := make(map[string]*Message, len(p.Messages))
 	for k, v := range p.Messages {
-		if msg, err := compile(v, n); err != nil {
+		if msg, err := compile(lang, v, n); err != nil {
 			return nil, err
 		} else {
 			messages[k] = msg
@@ -60,7 +60,7 @@ func newPluralArg(p *ast.PluralArg) (*pluralArg, error) {
 	}, nil
 }
 
-func (p *pluralArg) format(b *strings.Builder, arguments map[string]interface{}) error {
+func (p *pluralArg) format(b *strings.Builder, lang language.Tag, arguments map[string]interface{}) error {
 	value, ok := arguments[p.ArgID]
 	if !ok {
 		return fmt.Errorf("missing arg: %q", p.ArgID)
@@ -73,11 +73,10 @@ func (p *pluralArg) format(b *strings.Builder, arguments map[string]interface{})
 
 	category := fmt.Sprintf("=%d", n)
 	if msg, ok := p.Messages[category]; ok {
-		return msg.format(b, arguments)
+		return msg.format(b, lang, arguments)
 	}
 
 	var form plural.Form
-	lang := language.MustParse("en")
 	if p.Ordinal {
 		form = plural.Ordinal.MatchPlural(lang, n, 0, 0, 0, 0)
 	} else {
@@ -99,9 +98,9 @@ func (p *pluralArg) format(b *strings.Builder, arguments map[string]interface{})
 	}
 
 	if msg, ok := p.Messages[category]; ok {
-		return msg.format(b, arguments)
+		return msg.format(b, lang, arguments)
 	}
 
 	msg := p.Messages["other"]
-	return msg.format(b, arguments)
+	return msg.format(b, lang, arguments)
 }

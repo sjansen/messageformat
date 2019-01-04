@@ -114,7 +114,7 @@ func TestCompileAndFormat(t *testing.T) {
 			"count": 2,
 		},
 	}} {
-		compiled, err := Compile(tc.message)
+		compiled, err := Compile("en", tc.message)
 		require.NoError(err)
 
 		actual, err := compiled.Format(tc.arguments)
