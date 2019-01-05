@@ -2,6 +2,7 @@
 /dist/
 
 # Files
+/messageformat
 /TODO
 .DS_Store
 c.out

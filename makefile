@@ -1,4 +1,10 @@
+.PHONY:  default  refresh  test  test-coverage  test-docker
+
 default: test
+
+refresh:
+	cookiecutter gh:sjansen/cookiecutter-golang --output-dir .. --config-file .cookiecutter.yaml --no-input --overwrite-if-exists
+	git checkout go.mod go.sum
 
 test:
 	@scripts/run-all-tests
@@ -14,5 +20,3 @@ test-coverage:
 test-docker:
 	docker-compose --version
 	docker-compose up --abort-on-container-exit --exit-code-from=go --force-recreate
-
-.PHONY: default test test-docker
