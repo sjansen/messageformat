@@ -51,21 +51,24 @@ func TestParse(t *testing.T) {
 			&ast.Text{Value: "\nUntil: "},
 			&ast.SimpleArg{ArgID: "end", ArgType: ast.DateType, ArgStyle: ast.ShortStyle},
 		}}},
-		{"{timespan, select, afternoon{Boa tarde, {name}.} evening{Boa noite, {name}.} other{Bom dia, {name}.}}",
+		{`{timespan, select,
+		    afternoon{Boa tarde, {name}.}
+		    evening{Boa noite, {name}.}
+		    other{Bom dia, {name}.}}`,
 			&ast.Message{Parts: []ast.Part{
 				&ast.SelectArg{ArgID: "timespan",
 					Messages: map[string]*ast.Message{
-						"afternoon": &ast.Message{Parts: []ast.Part{
+						"afternoon": {Parts: []ast.Part{
 							&ast.Text{Value: "Boa tarde, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
 						}},
-						"evening": &ast.Message{Parts: []ast.Part{
+						"evening": {Parts: []ast.Part{
 							&ast.Text{Value: "Boa noite, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
 						}},
-						"other": &ast.Message{Parts: []ast.Part{
+						"other": {Parts: []ast.Part{
 							&ast.Text{Value: "Bom dia, "},
 							&ast.PlainArg{ArgID: "name"},
 							&ast.Text{Value: "."},
@@ -76,13 +79,13 @@ func TestParse(t *testing.T) {
 			&ast.Message{Parts: []ast.Part{
 				&ast.SelectArg{ArgID: "timespan",
 					Messages: map[string]*ast.Message{
-						"afternoon": &ast.Message{Parts: []ast.Part{
+						"afternoon": {Parts: []ast.Part{
 							&ast.Text{Value: "Boa tarde"},
 						}},
-						"evening": &ast.Message{Parts: []ast.Part{
+						"evening": {Parts: []ast.Part{
 							&ast.Text{Value: "Boa noite"},
 						}},
-						"other": &ast.Message{Parts: []ast.Part{
+						"other": {Parts: []ast.Part{
 							&ast.Text{Value: "Bom dia"},
 						}},
 					}},
@@ -125,16 +128,16 @@ func TestParseArgument(t *testing.T) {
 		{"{6,select,afternoon{Boa tarde!}evening{Boa noite!}other{Bom dia!}}", &ast.SelectArg{
 			ArgID: "6",
 			Messages: map[string]*ast.Message{
-				"afternoon": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Boa tarde!"}}},
-				"evening":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Boa noite!"}}},
-				"other":     &ast.Message{Parts: []ast.Part{&ast.Text{Value: "Bom dia!"}}},
+				"afternoon": {Parts: []ast.Part{&ast.Text{Value: "Boa tarde!"}}},
+				"evening":   {Parts: []ast.Part{&ast.Text{Value: "Boa noite!"}}},
+				"other":     {Parts: []ast.Part{&ast.Text{Value: "Bom dia!"}}},
 			}}},
 		{"{7,plural,=0{no elves}one{one elf}other{multiple elves}}", &ast.PluralArg{
 			ArgID: "7",
 			Messages: map[string]*ast.Message{
-				"=0":    &ast.Message{Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
-				"one":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
-				"other": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
+				"=0":    {Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
+				"one":   {Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
+				"other": {Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
 			}}},
 		{`{ count, selectordinal,
 		    one {#st item}
@@ -144,19 +147,19 @@ func TestParseArgument(t *testing.T) {
 			ArgID:   "count",
 			Ordinal: true,
 			Messages: map[string]*ast.Message{
-				"one": &ast.Message{Parts: []ast.Part{
+				"one": {Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "st item"},
 				}},
-				"two": &ast.Message{Parts: []ast.Part{
+				"two": {Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "nd item"},
 				}},
-				"few": &ast.Message{Parts: []ast.Part{
+				"few": {Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "rd item"},
 				}},
-				"other": &ast.Message{Parts: []ast.Part{
+				"other": {Parts: []ast.Part{
 					&ast.NumberSign{},
 					&ast.Text{Value: "th item"},
 				}},

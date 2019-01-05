@@ -46,11 +46,11 @@ func newPluralArg(lang language.Tag, p *ast.PluralArg) (*pluralArg, error) {
 	}
 	messages := make(map[string]*Message, len(p.Messages))
 	for k, v := range p.Messages {
-		if msg, err := compile(lang, v, n); err != nil {
+		msg, err := compile(lang, v, n)
+		if err != nil {
 			return nil, err
-		} else {
-			messages[k] = msg
 		}
+		messages[k] = msg
 	}
 	return &pluralArg{
 		ArgID:    p.ArgID,

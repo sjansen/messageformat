@@ -16,11 +16,11 @@ type selectArg struct {
 func newSelectArg(lang language.Tag, s *ast.SelectArg) (*selectArg, error) {
 	messages := make(map[string]*Message, len(s.Messages))
 	for k, v := range s.Messages {
-		if msg, err := compile(lang, v, nil); err != nil {
+		msg, err := compile(lang, v, nil)
+		if err != nil {
 			return nil, err
-		} else {
-			messages[k] = msg
 		}
+		messages[k] = msg
 	}
 	return &selectArg{
 		ArgID:    s.ArgID,

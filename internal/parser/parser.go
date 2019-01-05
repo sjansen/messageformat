@@ -12,12 +12,12 @@ import (
 
 func Parse(s string) (*ast.Message, error) {
 	dec := decoder.New(s)
-	if parts, err := parseMessage(dec, 0, false); err != nil {
+	parts, err := parseMessage(dec, 0, false)
+	if err != nil {
 		return nil, err
-	} else {
-		msg := &ast.Message{Parts: parts}
-		return msg, nil
 	}
+	msg := &ast.Message{Parts: parts}
+	return msg, nil
 }
 
 func parseArgument(dec *decoder.Decoder, depth int) (ast.Part, error) {
@@ -204,12 +204,12 @@ func parsePluralStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message,
 		}
 		skipWhiteSpace(dec)
 
-		if parts, err := parseMessage(dec, depth+1, true); err != nil {
+		parts, err := parseMessage(dec, depth+1, true)
+		if err != nil {
 			return nil, err
-		} else {
-			msg := &ast.Message{Parts: parts}
-			messages[id] = msg
 		}
+		msg := &ast.Message{Parts: parts}
+		messages[id] = msg
 	}
 }
 
@@ -229,12 +229,12 @@ func parseSelectStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message,
 		id := parseID(dec)
 		skipWhiteSpace(dec)
 
-		if parts, err := parseMessage(dec, depth+1, false); err != nil {
+		parts, err := parseMessage(dec, depth+1, false)
+		if err != nil {
 			return nil, err
-		} else {
-			msg := &ast.Message{Parts: parts}
-			messages[id] = msg
 		}
+		msg := &ast.Message{Parts: parts}
+		messages[id] = msg
 	}
 }
 

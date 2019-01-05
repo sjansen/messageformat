@@ -6,10 +6,10 @@ type Decoder struct {
 	src string
 	idx int
 
-	currRune rune
 	currSize int
-	nextRune rune
 	nextSize int
+	currRune rune
+	nextRune rune
 }
 
 func New(s string) *Decoder {

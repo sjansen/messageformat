@@ -22,33 +22,32 @@ func compile(lang language.Tag, msg *ast.Message, n *numberSign) (*Message, erro
 		case *ast.NumberSign:
 			if n == nil {
 				return nil, fmt.Errorf("illegal NumberSign")
-			} else {
-				parts = append(parts, n)
 			}
+			parts = append(parts, n)
 		case *ast.PlainArg:
-			if tmp, err := newPlainArg(lang, x); err != nil {
+			tmp, err := newPlainArg(lang, x)
+			if err != nil {
 				return nil, err
-			} else {
-				parts = append(parts, tmp)
 			}
+			parts = append(parts, tmp)
 		case *ast.PluralArg:
-			if tmp, err := newPluralArg(lang, x); err != nil {
+			tmp, err := newPluralArg(lang, x)
+			if err != nil {
 				return nil, err
-			} else {
-				parts = append(parts, tmp)
 			}
+			parts = append(parts, tmp)
 		case *ast.SelectArg:
-			if tmp, err := newSelectArg(lang, x); err != nil {
+			tmp, err := newSelectArg(lang, x)
+			if err != nil {
 				return nil, err
-			} else {
-				parts = append(parts, tmp)
 			}
+			parts = append(parts, tmp)
 		case *ast.Text:
-			if tmp, err := newText(lang, x); err != nil {
+			tmp, err := newText(lang, x)
+			if err != nil {
 				return nil, err
-			} else {
-				parts = append(parts, tmp)
 			}
+			parts = append(parts, tmp)
 		}
 	}
 	return &Message{lang: lang, parts: parts}, nil

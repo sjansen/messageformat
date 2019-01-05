@@ -11,17 +11,17 @@ import (
 var hello = &ast.Message{Parts: []ast.Part{
 	&ast.SelectArg{ArgID: "timespan",
 		Messages: map[string]*ast.Message{
-			"afternoon": &ast.Message{Parts: []ast.Part{
+			"afternoon": {Parts: []ast.Part{
 				&ast.Text{Value: "Boa tarde, "},
 				&ast.PlainArg{ArgID: "name"},
 				&ast.Text{Value: "."},
 			}},
-			"evening": &ast.Message{Parts: []ast.Part{
+			"evening": {Parts: []ast.Part{
 				&ast.Text{Value: "Boa noite, "},
 				&ast.PlainArg{ArgID: "name"},
 				&ast.Text{Value: "."},
 			}},
-			"other": &ast.Message{Parts: []ast.Part{
+			"other": {Parts: []ast.Part{
 				&ast.Text{Value: "Bom dia, "},
 				&ast.PlainArg{ArgID: "name"},
 				&ast.Text{Value: "."},
@@ -34,19 +34,19 @@ var items = &ast.Message{Parts: []ast.Part{
 		ArgID:   "count",
 		Ordinal: true,
 		Messages: map[string]*ast.Message{
-			"one": &ast.Message{Parts: []ast.Part{
+			"one": {Parts: []ast.Part{
 				&ast.NumberSign{},
 				&ast.Text{Value: "st item"},
 			}},
-			"two": &ast.Message{Parts: []ast.Part{
+			"two": {Parts: []ast.Part{
 				&ast.NumberSign{},
 				&ast.Text{Value: "nd item"},
 			}},
-			"few": &ast.Message{Parts: []ast.Part{
+			"few": {Parts: []ast.Part{
 				&ast.NumberSign{},
 				&ast.Text{Value: "rd item"},
 			}},
-			"other": &ast.Message{Parts: []ast.Part{
+			"other": {Parts: []ast.Part{
 				&ast.NumberSign{},
 				&ast.Text{Value: "th item"},
 			}},
@@ -57,9 +57,9 @@ var elves = &ast.Message{Parts: []ast.Part{
 	&ast.PluralArg{
 		ArgID: "count",
 		Messages: map[string]*ast.Message{
-			"=0":    &ast.Message{Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
-			"one":   &ast.Message{Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
-			"other": &ast.Message{Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
+			"=0":    {Parts: []ast.Part{&ast.Text{Value: "no elves"}}},
+			"one":   {Parts: []ast.Part{&ast.Text{Value: "one elf"}}},
+			"other": {Parts: []ast.Part{&ast.Text{Value: "multiple elves"}}},
 		}},
 }}
 
