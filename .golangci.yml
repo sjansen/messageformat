@@ -8,6 +8,7 @@ run:
 linters:
     enable:
     - deadcode
+    - gocritic
     - gocyclo
     - gofmt
     - goimports

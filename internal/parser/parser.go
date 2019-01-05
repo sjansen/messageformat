@@ -31,12 +31,13 @@ func parseArgument(dec *decoder.Decoder, depth int) (ast.Part, error) {
 
 	dec.Decode()
 	ch := dec.Decoded()
-	if ch == '}' {
+	switch ch {
+	case '}':
 		arg := &ast.PlainArg{ArgID: argNameOrNumber}
 		return arg, nil
-	} else if ch == ',' {
+	case ',':
 		skipWhiteSpace(dec)
-	} else {
+	default:
 		return nil, &errors.UnexpectedToken{Token: string(ch)}
 	}
 
@@ -96,22 +97,24 @@ func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Part, e
 			return nil, err
 		}
 	}
+loop:
 	for {
 		next := dec.Peek()
-		if next == utf8.RuneError {
-			break // TODO
-		} else if depth > 0 && next == '}' {
-			break
-		} else if next == '{' {
+		switch {
+		case next == utf8.RuneError:
+			break loop // TODO
+		case depth > 0 && next == '}':
+			break loop
+		case next == '{':
 			part, err := parseArgument(dec, depth)
 			if err != nil {
 				return nil, err
 			}
 			parts = append(parts, part)
-		} else if inPlural && next == '#' {
+		case inPlural && next == '#':
 			dec.Decode()
 			parts = append(parts, &ast.NumberSign{})
-		} else {
+		default:
 			part, err := parseMessageText(dec, depth, inPlural)
 			if err != nil {
 				return nil, err
@@ -151,17 +154,18 @@ func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text
 func parseMessageTextAfterQuote(b *strings.Builder, dec *decoder.Decoder, depth int, inPlural bool) bool {
 	done := false
 	next := dec.Peek()
-	if next == utf8.RuneError {
+	switch {
+	case next == utf8.RuneError:
 		b.WriteRune('\'')
 		done = true
-	} else if next == '\'' {
+	case next == '\'':
 		b.WriteRune('\'')
 		dec.Decode()
 		next := dec.Peek()
 		done = (next == '{') || (depth > 0 && next == '}') || (inPlural && next == '#')
-	} else if next == '{' || next == '}' || (inPlural && next == '#') {
+	case next == '{' || next == '}' || (inPlural && next == '#'):
 		parseMessageTextInQuote(b, dec)
-	} else {
+	default:
 		b.WriteRune('\'')
 	}
 	return done
@@ -173,13 +177,13 @@ func parseMessageTextInQuote(b *strings.Builder, dec *decoder.Decoder) {
 		if ch != '\'' {
 			b.WriteRune(ch)
 		} else {
-			next := dec.Peek()
-			if next == utf8.RuneError {
+			switch dec.Peek() {
+			case utf8.RuneError:
 				break
-			} else if next == '\'' {
+			case '\'':
 				b.WriteRune('\'')
 				dec.Decode()
-			} else {
+			default:
 				return
 			}
 		}
@@ -252,11 +256,12 @@ func parseSelectStyle(dec *decoder.Decoder, depth int) (map[string]*ast.Message,
 func parseSimpleStyle(dec *decoder.Decoder, depth int) (ast.ArgStyle, error) {
 	skipWhiteSpace(dec)
 	next := dec.Peek()
-	if next == '}' {
+	switch next {
+	case '}':
 		return ast.DefaultStyle, nil
-	} else if next == ',' {
+	case ',':
 		dec.Decode()
-	} else {
+	default:
 		return ast.DefaultStyle, &errors.UnexpectedToken{Token: string(next)}
 	}
 
