@@ -140,14 +140,10 @@ func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text
 				b.WriteRune('\'')
 				dec.Decode()
 				next := dec.Peek()
-				if next == '{' || (depth > 0 && next == '}') {
-					break
-				} else if inPlural && next == '#' {
+				if next == '{' || (depth > 0 && next == '}') || (inPlural && next == '#') {
 					break
 				}
-			} else if next == '{' || next == '}' {
-				parseMessageTextInQuote(&b, dec)
-			} else if inPlural && next == '#' {
+			} else if next == '{' || next == '}' || (inPlural && next == '#') {
 				parseMessageTextInQuote(&b, dec)
 			} else {
 				b.WriteRune('\'')
@@ -155,9 +151,7 @@ func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text
 		} else {
 			b.WriteRune(ch)
 			next := dec.Peek()
-			if next == '{' || (depth > 0 && next == '}') {
-				break
-			} else if inPlural && next == '#' {
+			if next == '{' || (depth > 0 && next == '}') || (inPlural && next == '#') {
 				break
 			}
 		}
