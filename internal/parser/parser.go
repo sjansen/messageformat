@@ -128,11 +128,11 @@ func parseMessage(dec *decoder.Decoder, depth int, inPlural bool) ([]ast.Part, e
 }
 
 func parseMessageText(dec *decoder.Decoder, depth int, inPlural bool) (*ast.Text, error) {
-	var b strings.Builder
+	b := &strings.Builder{}
 	for dec.Decode() {
 		ch := dec.Decoded()
 		if ch == '\'' {
-			done := parseMessageTextAfterQuote(&b, dec, depth, inPlural)
+			done := parseMessageTextAfterQuote(b, dec, depth, inPlural)
 			if done {
 				break
 			}
@@ -158,9 +158,7 @@ func parseMessageTextAfterQuote(b *strings.Builder, dec *decoder.Decoder, depth 
 		b.WriteRune('\'')
 		dec.Decode()
 		next := dec.Peek()
-		if next == '{' || (depth > 0 && next == '}') || (inPlural && next == '#') {
-			done = true
-		}
+		done = (next == '{') || (depth > 0 && next == '}') || (inPlural && next == '#')
 	} else if next == '{' || next == '}' || (inPlural && next == '#') {
 		parseMessageTextInQuote(b, dec)
 	} else {
