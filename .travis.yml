@@ -1,14 +1,13 @@
-language: go
-go:
- - "1.11.x"
-env:
- - GO111MODULE=on
+dist: trusty
+services:
+  - docker
+
 before_script:
  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
  - chmod +x ./cc-test-reporter
  - ./cc-test-reporter before-build
-install:
- - go get -t -v ./...
-script: go test -coverprofile=c.out -tags integration ./...
+
+script: docker-compose up --abort-on-container-exit --exit-code-from=go --force-recreate
+
 after_script:
  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
