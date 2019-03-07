@@ -1,0 +1,13 @@
+version: 1
+cli:
+  server: https://app.fossa.io
+  fetcher: custom
+  project: messageformat
+analyze:
+  modules:
+  - name: github.com/sjansen/messageformat
+    type: go
+    target: github.com/sjansen/messageformat
+    path: .
+    options:
+      all-tags: true
